@@ -22,6 +22,6 @@ for i in range(len(data)):
         charge = 2
     else:
         charge = -2
-    line = '%10i %5i %5i %20.8f %20.8f %20.8f\n'%(i+1, data[i][1], charge, data[i][2], data[i][3], data[i][4])
+    line = '%10i %5i %8.2f %20.8f %20.8f %20.8f\n'%(i+1, data[i][1], charge, data[i][2], data[i][3], data[i][4])
     newfile.write(line)
 newfile.close()
