@@ -6,6 +6,4 @@ This folder contains the input files for LAMMPS.
 
 lmp_serial -in in.file
 
-mpirun -np 4 lmp_mpi -in in.file
-
-mpirun -np 8 /path/to/lammps/src/lmp_mpi -in in.file
+mpirun -np 4 ./lmp_mpi -in in.file
