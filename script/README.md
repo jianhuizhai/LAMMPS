@@ -3,7 +3,7 @@
 This folder contains the scripts for pre- and post-processing
 
 # how to use
----
+===
 1.charge.py is used to assign charge amount to specified atom type. (Now it is just for MgO)
 
 command examle:
