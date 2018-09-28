@@ -3,9 +3,10 @@ import numpy as np
 
 OldFileName = sys.argv[1]
 skipline = int(sys.argv[2])
-axis     = sys.argv[3]
-NewFileName = sys.argv[4]      # NewFileName is the name of new file
+NewFileName = sys.argv[3]      # NewFileName is the name of new file
 
+print('type which axis is compressed or tension')
+axis     = input()
 print('axis=',axis)
 print('old file name is', OldFileName)
 print('new file name is', NewFileName)
