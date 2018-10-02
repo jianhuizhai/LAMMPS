@@ -2,11 +2,13 @@ import sys
 import numpy as np
 
 OldFileName = sys.argv[1]
-skipline = int(sys.argv[2])
-NewFileName = sys.argv[3]      # NewFileName is the name of new file
+# skipline = int(sys.argv[2])
+NewFileName = sys.argv[2]      # NewFileName is the name of new file
 
-print('type which axis is compressed or tension')
-axis     = input()
+skipline = 16   # this number is for atoms system with two type atoms.
+
+# print('type which axis is compressed or tension')
+axis     = raw_input('type which axis is compressed or tension: ')
 print('axis=',axis)
 print('old file name is', OldFileName)
 print('new file name is', NewFileName)
