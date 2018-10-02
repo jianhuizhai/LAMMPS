@@ -11,14 +11,19 @@ print('new file name is', NewFileName)
 
 # for skipline you can use if command for different crystal lattices.
 # here 16 is used for a lattice type contains two atom types.
-skipline = 16    
-   
+skipline = 16
+
 data = np.loadtxt(OldFileName, skiprows=(skipline))
 newfile = open(NewFileName, 'w')
 
 oldfile = open(OldFileName,'r')
 for i in range(skipline):
-    line = oldfile.readline()
+    if (i == skipline-2):
+        line = "Atoms # charge\n"
+    elif(i == skipline-1):
+        line = "\n"
+    else:
+        line = oldfile.readline()
     newfile.write(line)
 oldfile.close()
 
