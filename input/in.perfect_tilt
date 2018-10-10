@@ -13,7 +13,6 @@ pair_coeff      * *     0.0         1.0         0.0    # Mg-Mg
 pair_coeff      1 2     929.69     0.29909      0.0    # Mg-O
 pair_coeff      2 2     4870.0     0.2670       77.0   # O-O
 
-
 # MD parameters
 kspace_style        pppm    1.0e-6
 
@@ -29,14 +28,8 @@ thermo      20
 thermo_style custom step pe lx ly lz xy press pxx pyy pzz
 thermo_modify format 2 %16.8f
 
-#reset_timestep  0
-
 min_style       cg
 minimize   0.0  1.0e-13  5000  10000
-
-# change box to triclinic
-# change_box      all triclinic
-# kspace_style    pppm   1.0e-6
 
 variable  n equal  20
 variable length equal "lx"
@@ -46,7 +39,7 @@ dump 1 all custom 50 dump.dipole.*  id type element xu yu zu c_peratom c_virial[
 dump_modify     1 sort id element Mg O
 
 label forloop
-  # the beginning value of a is 1; end value of a is 4.
+
   variable a loop ${n}
 
   # apply shear displacement
@@ -56,6 +49,7 @@ label forloop
   minimize   0.0 1.0e-9 5000 10000
 
   next a
+  
 jump in.shear forloop
 
 print "All done"
