@@ -40,13 +40,13 @@ label forloop
     variable a loop 3
 
     # minimize under constant volume
-    minimize   0.0 1.0e-13 5000 10000
+    minimize   0.0 1.0e-9 5000 10000
 
     # minimization under constant pressure
     fix         1 all box/relax aniso 0.0 vmax 0.001
     minimize        0.0 1.0e-9 5000 10000
     unfix    1
     next a
-jump in.dipole forloop
+jump in.relax forloop
 
 print "All done"
