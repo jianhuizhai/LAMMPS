@@ -26,7 +26,7 @@ variable ptrace atom  -(c_virial[1]+c_virial[2]+c_virial[3])/3
 
 # thermo outputs
 thermo      50
-thermo_style custom step pe lx ly lz xy press pxx pyy pzz
+thermo_style custom step pe lx ly lz xy press pxx pyy pzz pxy
 thermo_modify format 2 %16.8f
 
 #reset_timestep  0
@@ -34,11 +34,11 @@ thermo_modify format 2 %16.8f
 min_style       cg
 minimize   0.0  1.0e-13  5000  10000
 
-variable  n equal  200
+variable  n equal  60
 variable length equal "lx"
 variable disp equal 0.001*${length}
 
-dump 1 all custom 50 dump.dipole.*  id type element xu yu zu c_peratom c_virial[1] c_virial[2] c_virial[3] c_virial[4] c_virial[5] c_virial[6] v_ptrace
+dump 1 all custom 50 dump.shear.*  id type element xu yu zu c_peratom c_virial[1] c_virial[2] c_virial[3] c_virial[4] c_virial[5] c_virial[6] v_ptrace
 dump_modify     1 sort id element Mg O
 
 label forloop
