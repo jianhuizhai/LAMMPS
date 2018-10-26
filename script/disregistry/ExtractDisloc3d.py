@@ -2,6 +2,7 @@
 '''This code is for edge dislocation.'''
 '''Dislocation glide in xz plane, line direction is z. Burgurs vector along x direction.'''
 
+import os
 import numpy as np
 import sys
 import linecache
@@ -20,8 +21,10 @@ def rho(x,b, mean, width):
 #======================================================================================
 #                       specify the filename in the terminal
 
-filename = sys.argv[1]       # you need to 
-
+filename = sys.argv[1]
+if not os.path.isfile(filename):
+    print("The file is not existed!")
+    exit()
 #=======================================================================================
 #                        material parameter under different pressures
 #=======================================================================================
