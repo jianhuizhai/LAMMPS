@@ -48,7 +48,7 @@ for i in range(3):
     filename = SearchFile.findfile('.', 'DislocInfo_', '.')[2:]
     print("filename is ", filename)
 
-    px[i] = np.loadtxt(filename, skiprows=skipline, usecols=7)
+    px[i] = np.loadtxt(filename, skiprows=skipline, usecols=8)
     os.chdir("../")
     print("cwd: ", os.getcwd())
     print(linecommon)
