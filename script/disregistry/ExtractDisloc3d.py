@@ -1,5 +1,6 @@
 '''This code is used to extract plane along dislocation direction'''
-'''This code now is worked for slice process.'''
+'''This code is for edge dislocation.'''
+'''Dislocation glide in xz plane, line direction is z. Burgurs vector along x direction.'''
 
 import numpy as np
 import sys
@@ -15,6 +16,11 @@ def func(x,b,mean,width):
     return b/np.pi*np.arctan((x-mean)/width)+b/2
 def rho(x,b, mean, width):
     return b/np.pi*width/(np.power(x-mean,2)+ np.power(width,2))
+
+#======================================================================================
+#                       specify the filename in the terminal
+
+filename = sys.argv[1]       # you need to 
 
 #=======================================================================================
 #                        material parameter under different pressures
@@ -44,7 +50,7 @@ ZDistance = 0.5*alat
 #=======================================================================================
 #                               extract disloc
 #=======================================================================================
-filename = sys.argv[1]       # you need to specify the filename in the terminal
+
 
 xlim = linecache.getline(filename, 6)
 ylim = linecache.getline(filename, 7)
@@ -58,6 +64,10 @@ print("xlim ", xlim, end='')
 print("ylim ", ylim, end='')
 print("zlim ", zlim)
 
+linecommon = '=========================================================\n'
+print(linecommon)
+
+#============================================================================
 skipline = 9
 atomtype = np.loadtxt(filename, skiprows=skipline, usecols=(1))
 data     = np.loadtxt(filename, skiprows=skipline, usecols=(3,4,5))
@@ -74,7 +84,6 @@ ylayers = int( (yhi-ylo)/YDistance )
 zlayers = int( (zhi-zlo)/ZDistance )+1 # actual layers is zlayers+1
 
 #===========================================================================
-linecommon = '=========================================================\n'
 
 print("ylayers = ", ylayers)
 print("zlayers = ", zlayers)
