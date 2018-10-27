@@ -10,24 +10,6 @@ import matplotlib.pylab as plt
 def func(x,a):
     return a*np.power(x, 2)
 
-#======================================================================================
-#                            specify pressure
-#======================================================================================
-pressure = int(input("type the pressure of system: (100, 60, 30 or 0 -- units in GPa)"+"\n"))
-
-if(pressure == 100):
-    alat = 3.83
-elif(pressure == 60):
-    alat = 3.94
-elif(pressure == 30):
-    alat = 4.05
-elif(pressure == 0):
-    alat = 4.22
-else:
-    print("The pressure is not included in the code.")
-    exit()
-bmag = 0.5*np.sqrt(2)*alat
-
 #=====================================================================================
 #               getting data from corresponed folder
 #=====================================================================================
