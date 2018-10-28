@@ -1,7 +1,13 @@
 '''This code is used to extract plane along dislocation direction'''
 '''This code is for edge dislocation.'''
 '''Dislocation glide in xz plane, line direction is z. Burgurs vector along x direction.'''
-
+#========================================================================================
+'Attenton: x_fit should be used to determine the position of dislocation not x_calcu.'
+'x_calcu is not exactly corrected.'
+# when add determine jog position, add code to determine the dislocation line direction,
+# direction of burgers vector and direction normal to line direction and burgers vector
+#========================================================================================
+import os
 import numpy as np
 import sys
 import linecache
@@ -12,16 +18,21 @@ import matplotlib.pylab as plt
 #======================================================================================
 #       define objective function to fit disregistry and density of disregistry
 #======================================================================================
-def func(x,b,mean,width):
-    return b/np.pi*np.arctan((x-mean)/width)+b/2
-def rho(x,b, mean, width):
-    return b/np.pi*width/(np.power(x-mean,2)+ np.power(width,2))
+def func(x, b, alpha, mean1,width1,mean2, width2):
+    return 0.5*b + b/np.pi*( alpha *np.arctan( (x-mean1)/width1 ) + 0.5*(1-alpha)*np.arctan( (x-mean1-mean2)/width2) + \
+    0.5*(1-alpha)*np.arctan( (x-mean1+mean2)/width2))
+def rho(x,b, alpha, mean1, width1, mean2, width2):
+    return b/np.pi*( alpha * width1/(np.power(x-mean1,2)+ np.power(width1,2)) + \
+    0.5*(1-alpha)* width2/( np.power(x-mean1-mean2,2) + np.power(width2,2)) + \
+    0.5*(1-alpha)* width2/( np.power(x-mean1+mean2,2) + np.power(width2,2)))
 
 #======================================================================================
 #                       specify the filename in the terminal
 
-filename = sys.argv[1]       # you need to 
-
+filename = sys.argv[1]
+if not os.path.isfile(filename):
+    print("The file is not existed!")
+    exit()
 #=======================================================================================
 #                        material parameter under different pressures
 #=======================================================================================
@@ -105,8 +116,8 @@ Info.write(linecommon)
 line = 'Info about disloc'+'\n'
 Info.write(line)
 Info.write(linecommon)
-line1 = 'PlaneNum   DislocNum       calculated properties(b_c, x_c, y_c, z_c)      '
-line2 = 'fitting properties(b, x0, width)\n'
+line1 = 'PlaneNum   DislocNum       calculated properties(b_c, x_c, y_c, z_c)            '
+line2 = 'fitting properties(b, alpha, x1, width1, x2, width2)\n'
 line  = line1 + line2 + '\n'
 Info.write(line)
 #======================================================================
@@ -191,11 +202,13 @@ for i in range(zlayers):
         # print("atoms = ",atoms)
         disregistry = np.zeros(atoms)
         if(len(half2)> len(half1)):
-            atoms_above = np.array( [x[0] for x in half2] )[0:len(half2)-1]  # x[0] command is used to get first column value of list half2
-            atoms_below = np.array( [x[0] for x in half1] )
+            atoms_above  = np.array( [x[0] for x in half2] )[0:len(half2)-1]  # x[0] command is used to get first column value of list half2
+            atoms_below  = np.array( [x[0] for x in half1] )
+            atoms_disreg = atoms_below
         else:
-            atoms_above = np.array( [x[0] for x in half2] )
-            atoms_below = np.array( [x[0] for x in half1] )[0:len(half1)-1]
+            atoms_above  = np.array( [x[0] for x in half2] )
+            atoms_below  = np.array( [x[0] for x in half1] )[0:len(half1)-1]
+            atoms_disreg = atoms_above
 
         if(atoms_above[0]-atoms_below[0] > 0):
             disregistry = 0.5*bmag -(atoms_above-atoms_below)
@@ -207,28 +220,32 @@ for i in range(zlayers):
         density_max  = min(list(disregistry), key=lambda x:abs(x-0.5*b_calculated))
 
         # get index of the density_max and then get corresponded atoms_above value
-        x_calculated = atoms_above[list(disregistry).index(density_max)]
+        x_calculated = atoms_disreg[list(disregistry).index(density_max)]
         y_calculated = np.mean( AtomsDisloc[:,1] )
         z_calculated = np.mean( AtomsDisloc[:,2] )
 
         f = open('disregistry.plane' + str(PlaneNum) +'Dis' +str(DislocNum)+'.dat', 'w')
         for k in range(len(disregistry)):
-            line = '%16.8f %16.8f \n'%(atoms_above[k], disregistry[k])
+            line = '%16.8f %16.8f \n'%(atoms_disreg[k], disregistry[k])
             f.write(line)
         f.close()
 #=========================================================================================
 #                              curve fitting 
 #=========================================================================================
-        popt, pcov = curve_fit(func, atoms_above, disregistry, p0=[b_calculated, x_calculated, 2.0])
+        popt, pcov = curve_fit(func, atoms_disreg, disregistry, p0=[b_calculated, 0.5, x_calculated, 1.7, 0.25*x_calculated, 2.0])
         b    = popt[0]
-        mean = popt[1]
-        width = popt[2]
-        x=[i for i in np.arange(0.,np.max(atoms_above),0.1)]
+        alpha = popt[1]
+        mean1 = popt[2]
+        width1 = popt[3]
+        mean2  = popt[4]
+        width2 = popt[5]
+
+        x=[i for i in np.arange(0.,np.max(atoms_disreg),0.1)]
         x = np.array(x)
-        yvals=func(x, b, mean,width)
+        yvals=func(x, b, alpha, mean1,width1,mean2,width2)
 
         fig, ax1 = plt.subplots(figsize=(18.5,10.5))
-        ax1.plot( atoms_above, disregistry, 'o', label='data')
+        ax1.plot( atoms_disreg, disregistry, 'o', label='data')
         ax1.plot(x, yvals, 'r',linewidth=5.0,label='fit')
         ax1.set_xlabel("x"+'(' + r'$\AA$' +')')
         # Make the y-axis label, ticks and tick labels match the line color.
@@ -237,7 +254,7 @@ for i in range(zlayers):
 
         ax2 = ax1.twinx()
         rho2 = np.vectorize(rho)
-        ax2.plot(x, rho2(x, b, mean, width), 'blue', linewidth=3.0, label ='density')
+        ax2.plot(x, rho2(x, b, alpha, mean1, width1, mean2, width2), 'blue', linewidth=3.0, label ='density')
         ax2.set_ylabel(r'$\rho$', color='blue')
         ax2.tick_params('y', colors='blue')
         fig.tight_layout()
@@ -245,9 +262,9 @@ for i in range(zlayers):
         plt.savefig('disregistry.plane'+ str(PlaneNum) + 'Disloc'+str(DislocNum)+'.pdf',bbox_inches="tight")
         # plt.show()
 #============================================================================================
-        line1 = '%4i %11i' %(PlaneNum, DislocNum)
-        line2 = '%16.8f %16.8f %16.8f %16.8f' %(b_calculated, x_calculated, y_calculated, z_calculated)
-        line3 = '%16.8f %16.8f %16.8f' %(b, mean, width)
+        line1 = '%4i %10i' %(PlaneNum, DislocNum)
+        line2 = '%14.8f %14.8f %14.8f %14.8f ' %(b_calculated, x_calculated, y_calculated, z_calculated)
+        line3 = '%14.8f %12.8f %14.8f %14.8f %14.8f %14.8f' %(b, alpha, mean1, width1, mean2, width2)
         line  = line1 + line2 +line3 +'\n'
         Info.write(line)
 Info.close
