@@ -117,7 +117,7 @@ line = 'Info about disloc'+'\n'
 Info.write(line)
 Info.write(linecommon)
 line1 = 'PlaneNum   DislocNum       calculated properties(b_c, x_c, y_c, z_c)            '
-line2 = 'fitting properties(b, alpha, x1, width1, x2, width2)\n'
+line2 = 'fitting properties(b, alpha, x1, width1, x2, width2)                         Percent(%) \n'
 line  = line1 + line2 + '\n'
 Info.write(line)
 #======================================================================
@@ -262,9 +262,9 @@ for i in range(zlayers):
         plt.savefig('disregistry.plane'+ str(PlaneNum) + 'Disloc'+str(DislocNum)+'.pdf',bbox_inches="tight")
         # plt.show()
 #============================================================================================
-        line1 = '%4i %10i' %(PlaneNum, DislocNum)
+        line1 = '%4i %8i' %(PlaneNum, DislocNum)
         line2 = '%14.8f %14.8f %14.8f %14.8f ' %(b_calculated, x_calculated, y_calculated, z_calculated)
-        line3 = '%14.8f %12.8f %14.8f %14.8f %14.8f %14.8f' %(b, alpha, mean1, width1, mean2, width2)
+        line3 = '%14.8f %12.8f %14.8f %14.8f %14.8f %14.8f %6.2f' %(b, alpha, mean1, width1, mean2, width2, 100*(y_calculated-ylo)/(yhi-ylo))
         line  = line1 + line2 +line3 +'\n'
         Info.write(line)
 Info.close
