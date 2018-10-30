@@ -10,6 +10,25 @@ import matplotlib.pylab as plt
 def func(x,a):
     return a*np.power(x, 2)
 
+#=======================================================================================
+#                        material parameter under different pressures
+#=======================================================================================
+pressure = int(input("type the pressure of system: (100, 60, 30 or 0 -- units in GPa)"+"\n"))
+
+if(pressure == 100):
+    alat = 3.83
+elif(pressure == 60):
+    alat = 3.94
+elif(pressure == 30):
+    alat = 4.05
+elif(pressure == 0):
+    alat = 4.22
+else:
+    print("The pressure is not included in the code.")
+    exit()
+
+bmag = 0.5*np.sqrt(2)*alat
+
 #=====================================================================================
 #               getting data from corresponed folder
 #=====================================================================================
@@ -18,8 +37,9 @@ print(linecommon)
 print("cwd: ", os.getcwd())
 print(linecommon)
 
-middle = int(input("NUmber of middle image: "))
-img = [1, middle, 16]
+middle = int(input("Number of middle image: "))
+end    = int(input("Number of last image:  "))
+img = [1, middle, end]
 px = np.zeros((3,4))
 
 skipline = 9
@@ -39,7 +59,6 @@ for i in range(3):
 dx = np.zeros(2); de = np.zeros(2)
 dx_max  = px[2][1] - px[2][0] -(px[0][1] - px[0][0])
 dx_half = px[1][1] - px[1][0] -(px[0][1] - px[0][0])
-# dx_half = 0.5*bmag
 
 dx[1] = dx_max     # assign the coordinate difference for RD =1
 #-------------------------------------------------------------------------------------
@@ -71,7 +90,7 @@ Ea = np.max(energy) - energy_half
 #                    write results to energy_correction.dat
 #======================================================================================
 f = open('energy_correction.dat', 'w')
-line = 'dx = %12.10f \n' %dx[1]
+line = 'bmag    = %12.10f          dx = %12.10f \n' %(bmag,dx[1])
 f.write(line) 
 line = 'dx_half = %12.10f energy_half = %16.8f \n' %(dx_half, energy_half) 
 f.write(line)
@@ -82,6 +101,6 @@ f.close()
 #========================================================================================
 #                           print information on terminal
 #========================================================================================
-print("dx = ", dx)
-print("dx_half = ", dx_half, "energy_half = ", energy_half)
-print("Ea = ", Ea )
+print("bmag    = ", bmag, "         dx[1] = ", dx[1])
+print("dx_half = ", dx_half, "      energy_half = ", energy_half)
+print("Ea      = ", Ea )
