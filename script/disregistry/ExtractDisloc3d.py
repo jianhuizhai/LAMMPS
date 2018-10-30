@@ -91,9 +91,11 @@ pz   = np.min(z0) - ZDistance
 
 ratio = 1.6
 
-ylayers = int( (yhi-ylo)/YDistance )
-zlayers = int( (zhi-zlo)/ZDistance )+1 # actual layers is zlayers+1
+ylayers = round( (np.max(data[:,1]) - np.min(data[:,1]))/YDistance )       # 四舍五入
+zlayers = round( (np.max(data[:,2]) - np.min(data[:,2]))/ZDistance ) + 1
 
+ylayers = int(ylayers)
+zlayers = int(zlayers)
 #===========================================================================
 
 print("ylayers = ", ylayers)
@@ -169,6 +171,16 @@ for i in range(zlayers):
                 AtomsDisloc = half1+half2
                 AtomsDisloc = np.array(AtomsDisloc)
                 position.append(l)
+        #====================================================================================
+        #                      dump dislocation configuration
+        #====================================================================================
+        dumpfile = 'dump.plane'+str(PlaneNum) +".Disloc"+str(DislocNum)
+        DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[position], AtomsDisloc[:,0], AtomsDisloc[:,1], AtomsDisloc[:,2] )
+
+        #  sort half2 and half1 according to x coorinate
+        half1.sort(key=lambda x: x[0])
+        half2.sort(key=lambda x: x[0])
+
 
         py = np.min(above)
         len_above = len(half2)
@@ -186,15 +198,7 @@ for i in range(zlayers):
         else:
             DislocNum = DislocNum +1
             print("DislocNum = ", DislocNum)
-        #====================================================================================
-        #                      dump dislocation configuration
-        #====================================================================================
-            dumpfile = 'dump.plane'+str(PlaneNum) +".Disloc"+str(DislocNum)
-            DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[position], AtomsDisloc[:,0], AtomsDisloc[:,1], AtomsDisloc[:,2] )
-
-        #  sort half2 and half1 according to x coorinate
-            half1.sort(key=lambda x: x[0])
-            half2.sort(key=lambda x: x[0])
+        
         #====================================================================================
         #                  fitting disloc position
         #====================================================================================
