@@ -4,8 +4,6 @@
 #========================================================================================
 'Attenton: x_fit should be used to determine the position of dislocation not x_calcu.'
 'x_calcu is not exactly corrected.'
-# when add determine jog position, add code to determine the dislocation line direction,
-# direction of burgers vector and direction normal to line direction and burgers vector
 #========================================================================================
 import os
 import numpy as np
@@ -89,7 +87,7 @@ PlaneNum = 0
 
 pz   = np.min(z0) - ZDistance
 
-ratio = 1.6
+ratio = 1.5
 
 ylayers = round( (np.max(data[:,1]) - np.min(data[:,1]))/YDistance )       # 四舍五入
 zlayers = round( (np.max(data[:,2]) - np.min(data[:,2]))/ZDistance ) + 1
