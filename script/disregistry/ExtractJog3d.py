@@ -28,6 +28,7 @@ def rho(x,b, alpha, mean1, width1, mean2, width2):
 
 #======================================================================================
 #                       specify the filename in the terminal
+linecommon = '=========================================================\n'
 
 filename = sys.argv[1]
 if not os.path.isfile(filename):
@@ -50,6 +51,12 @@ else:
     print("The pressure is not included in the code.")
     exit()
 
+print(linecommon)
+#=======================================================================================
+flag_plane = input("Do you want to dump plane: (y or n) \n")
+flag_disloc= input("Do you want to dump disloc: (y or n) \n")
+
+print(linecommon)
 #=======================================================================================
 #        specify the distance between atoms in different directions
 #=======================================================================================
@@ -75,7 +82,7 @@ print("xlim ", xlim, end='')
 print("ylim ", ylim, end='')
 print("zlim ", zlim)
 
-linecommon = '=========================================================\n'
+
 print(linecommon)
 
 #============================================================================
@@ -89,7 +96,7 @@ x0 = data[:,0]; y0 = data[:,1]; z0 = data[:,2]
 
 PlaneNum = 0
 
-PointLine   = np.min(y0) - LineDistance
+PosiLine   = np.min(y0) - LineDistance
 
 ratio = 1.4
 
@@ -133,23 +140,23 @@ for i in range(LineLayers):
     AtomPosiZlayer = []
 
     for j in range( len(y0) ): # number of atoms in the simulation box
-        if( y0[j]< PointLine + ratio*LineDistance and y0[j]> PointLine):
+        if( y0[j]< PosiLine + ratio*LineDistance and y0[j]> PosiLine):
             planex.append( x0[j] ); planey.append( y0[j] ); planez.append( z0[j] )
             dataplane.append(data[j])
             AtomPosiZlayer.append( j )
 
     PlaneNum = PlaneNum + 1
     print(linecommon, "PlaneNum = ", PlaneNum)
-    
-    dumpfile = "dump.plane."+str(PlaneNum)
-    DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[AtomPosiZlayer], planex, planey,planez)
-    PointLine = np.max(planey)
+    if(flag_plane == 'y'):
+        dumpfile = "dump.plane."+str(PlaneNum)
+        DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[AtomPosiZlayer], planex, planey,planez)
+    PosiLine = np.max(planey)
 
 #========================================================================
 #            search for dislocation
 #========================================================================
     DislocNum = 0
-    PointNorm = np.min(z0)
+    PosiNorm = np.min(z0)
     for k in range(NormLayers):
         position = []
 # =======================================================================
@@ -161,8 +168,8 @@ for i in range(LineLayers):
         # AtomsDisloc = []
 
         for l in range(len(dataplane)):
-            if( dataplane[l][2] < PointNorm+ratio*NormDistance and dataplane[l][2]>= PointNorm):
-                if(dataplane[l][2]<PointNorm+0.5*ratio*NormDistance):
+            if( dataplane[l][2] < PosiNorm+ratio*NormDistance and dataplane[l][2]>= PosiNorm):
+                if(dataplane[l][2]<PosiNorm+0.5*ratio*NormDistance):
                     half1.append( dataplane[l] )
                 else:
                     half2.append(dataplane[l])
@@ -173,33 +180,31 @@ for i in range(LineLayers):
                 AtomsDisloc = half1+half2
                 AtomsDisloc = np.array(AtomsDisloc)
                 position.append(l)
-        #====================================================================================
-        #                      dump dislocation configuration
-        #====================================================================================
-        dumpfile = 'dump.plane'+str(PlaneNum) +".Disloc"+str(DislocNum)
-        DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[position], AtomsDisloc[:,0], AtomsDisloc[:,1], AtomsDisloc[:,2] )
-
-        #  sort half2 and half1 according to x coorinate
-        half1.sort(key=lambda x: x[0])
-        half2.sort(key=lambda x: x[0])
 
         len_above = len(half2)
         len_below = len(half1)
-        PointNorm = np.min(above)
+        PosiNorm = np.min(above)
         
         if( len_below == len_above ):
             continue
         elif( len_below ==0 or len_above ==0):
-            print(linecommon)
             print("one atom layer is empty!")
-            print("py = ", py)
-            print("ylim = ", ylim)
             print(linecommon)
             exit()
         else:
+            #  sort half2 and half1 according to x coorinate
+            half1.sort(key=lambda x: x[0])
+            half2.sort(key=lambda x: x[0])
+
             DislocNum = DislocNum +1
             print("DislocNum = ", DislocNum)
-        
+            #====================================================================================
+            #                      dump dislocation configuration
+            #====================================================================================
+            if(flag_disloc == 'y'):
+                dumpfile = 'dump.plane'+str(PlaneNum) +".Disloc"+str(DislocNum)
+                DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[position], AtomsDisloc[:,0], AtomsDisloc[:,1], AtomsDisloc[:,2] )
+
         #====================================================================================
         #                  fitting disloc position
         #====================================================================================
