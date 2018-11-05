@@ -4,6 +4,8 @@
 #========================================================================================
 'Attenton: x_fit should be used to determine the position of dislocation not x_calcu.'
 'x_calcu is not exactly corrected.'
+# when add determine jog position, add code to determine the dislocation line direction,
+# direction of burgers vector and direction normal to line direction and burgers vector
 #========================================================================================
 import os
 import numpy as np
@@ -26,6 +28,7 @@ def rho(x,b, alpha, mean1, width1, mean2, width2):
 
 #======================================================================================
 #                       specify the filename in the terminal
+linecommon = '=========================================================\n'
 
 filename = sys.argv[1]
 if not os.path.isfile(filename):
@@ -47,7 +50,12 @@ elif(pressure == 0):
 else:
     print("The pressure is not included in the code.")
     exit()
+print(linecommon)
 
+#=======================================================================================
+flag_plane = input("Do you want to dump plane: (y or n) \n")
+flag_disloc= input("Do you want to dump dislocation: (y or n) \n")
+print(linecommon)
 #=======================================================================================
 #        specify the distance between atoms in different directions
 #=======================================================================================
@@ -136,9 +144,11 @@ for i in range(zlayers):
 
     PlaneNum = PlaneNum + 1
     print(linecommon, "PlaneNum = ", PlaneNum)
-    
-    dumpfile = "dump.plane."+str(PlaneNum)
-    DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[AtomPosiZlayer], planex, planey,planez)
+    if(flag_plane == 'y'):
+        dumpfile = "dump.plane."+str(PlaneNum)
+        DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[AtomPosiZlayer], planex, planey,planez)
+
+    # the beginning position is the higest z of current plane
     pz = np.max(planez)
 
 #========================================================================
@@ -169,16 +179,6 @@ for i in range(zlayers):
                 AtomsDisloc = half1+half2
                 AtomsDisloc = np.array(AtomsDisloc)
                 position.append(l)
-        #====================================================================================
-        #                      dump dislocation configuration
-        #====================================================================================
-        dumpfile = 'dump.plane'+str(PlaneNum) +".Disloc"+str(DislocNum)
-        DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[position], AtomsDisloc[:,0], AtomsDisloc[:,1], AtomsDisloc[:,2] )
-
-        #  sort half2 and half1 according to x coorinate
-        half1.sort(key=lambda x: x[0])
-        half2.sort(key=lambda x: x[0])
-
 
         py = np.min(above)
         len_above = len(half2)
@@ -194,8 +194,18 @@ for i in range(zlayers):
             print(linecommon)
             exit()
         else:
+            #  sort half2 and half1 according to x coorinate
+            half1.sort(key=lambda x: x[0])
+            half2.sort(key=lambda x: x[0])
+        
             DislocNum = DislocNum +1
             print("DislocNum = ", DislocNum)
+            #====================================================================================
+            #                      dump dislocation configuration
+            #====================================================================================
+            if(flag_disloc == 'y'):
+                dumpfile = 'dump.plane'+str(PlaneNum) +".Disloc"+str(DislocNum)
+                DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[position], AtomsDisloc[:,0], AtomsDisloc[:,1], AtomsDisloc[:,2] )
         
         #====================================================================================
         #                  fitting disloc position
