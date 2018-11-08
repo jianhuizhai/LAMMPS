@@ -35,7 +35,7 @@ min_style       cg
 minimize   0.0  1.0e-13  5000  10000
 
 variable  n equal  60
-variable length equal "lx"
+variable length equal "ly"
 variable disp equal 0.001*${length}
 
 dump 1 all custom 50 dump.shear.*  id type element xu yu zu c_peratom c_virial[1] c_virial[2] c_virial[3] c_virial[4] c_virial[5] c_virial[6] v_ptrace
