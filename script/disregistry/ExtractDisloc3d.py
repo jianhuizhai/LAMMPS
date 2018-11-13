@@ -32,6 +32,8 @@ def rho(x , mean, width):
 
 #======================================================================================
 #                       specify the filename in the terminal
+#======================================================================================
+linecommon = '=========================================================\n'
 
 filename = sys.argv[1]
 if not os.path.isfile(filename):
@@ -53,7 +55,12 @@ elif(pressure == 0):
 else:
     print("The pressure is not included in the code.")
     exit()
+print(linecommon)
 
+#=======================================================================================
+flag_plane = input("Do you want to dump plane: (y or n) \n")
+flag_disloc= input("Do you want to dump dislocation: (y or n) \n")
+print(linecommon)
 #=======================================================================================
 #        specify the distance between atoms in different directions
 #=======================================================================================
@@ -93,7 +100,7 @@ PlaneNum = 0
 
 pz   = np.min(z0) - ZDistance
 
-ratio = 1.6
+ratio = 1.5
 
 ylayers = round( (np.max(data[:,1]) - np.min(data[:,1]))/YDistance )       # 四舍五入
 zlayers = round( (np.max(data[:,2]) - np.min(data[:,2]))/ZDistance ) + 1
@@ -123,7 +130,7 @@ line = 'Info about disloc'+'\n'
 Info.write(line)
 Info.write(linecommon)
 line1 = 'PlaneNum   DislocNum       calculated properties(b_c, x_c, y_c, z_c)            '
-line2 = 'fitting properties(b, mean, width)                         Percent(%) \n'
+line2 = 'fitting properties(mean, width)                 Percent(%) \n'
 line  = line1 + line2 + '\n'
 Info.write(line)
 #======================================================================
@@ -142,9 +149,11 @@ for i in range(zlayers):
 
     PlaneNum = PlaneNum + 1
     print(linecommon, "PlaneNum = ", PlaneNum)
+    if(flag_plane == 'y'):
+        dumpfile = "dump.plane."+str(PlaneNum)
+        DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[AtomPosiZlayer], planex, planey,planez)
     
-    dumpfile = "dump.plane."+str(PlaneNum)
-    DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[AtomPosiZlayer], planex, planey,planez)
+    # the beginning position is the higest z of current plane
     pz = np.max(planez)
 
 #========================================================================
@@ -175,16 +184,6 @@ for i in range(zlayers):
                 AtomsDisloc = half1+half2
                 AtomsDisloc = np.array(AtomsDisloc)
                 position.append(l)
-        #====================================================================================
-        #                      dump dislocation configuration
-        #====================================================================================
-        dumpfile = 'dump.plane'+str(PlaneNum) +".Disloc"+str(DislocNum)
-        DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[position], AtomsDisloc[:,0], AtomsDisloc[:,1], AtomsDisloc[:,2] )
-
-        #  sort half2 and half1 according to x coorinate
-        half1.sort(key=lambda x: x[0])
-        half2.sort(key=lambda x: x[0])
-
 
         py = np.min(above)
         len_above = len(half2)
@@ -200,8 +199,18 @@ for i in range(zlayers):
             print(linecommon)
             exit()
         else:
+            #  sort half2 and half1 according to x coorinate
+            half1.sort(key=lambda x: x[0])
+            half2.sort(key=lambda x: x[0])
+        
             DislocNum = DislocNum +1
             print("DislocNum = ", DislocNum)
+            #====================================================================================
+            #                      dump dislocation configuration
+            #====================================================================================
+            if(flag_disloc == 'y'):
+                dumpfile = 'dump.plane'+str(PlaneNum) +".Disloc"+str(DislocNum)
+                DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[position], AtomsDisloc[:,0], AtomsDisloc[:,1], AtomsDisloc[:,2] )
         
         #====================================================================================
         #                  fitting disloc position
@@ -268,7 +277,7 @@ for i in range(zlayers):
 #============================================================================================
         line1 = '%4i %8i' %(PlaneNum, DislocNum)
         line2 = '%14.8f %14.8f %14.8f %14.8f ' %(b_calculated, x_calculated, y_calculated, z_calculated)
-        line3 = '%12.8f %14.8f %6.2f' %( mean, width, 100*(y_calculated-ylo)/(yhi-ylo))
+        line3 = '%14.8f %14.8f %6.2f' %( mean, width, 100*(y_calculated-ylo)/(yhi-ylo))
         line  = line1 + line2 +line3 +'\n'
         Info.write(line)
 Info.close
