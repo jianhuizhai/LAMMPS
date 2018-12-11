@@ -101,6 +101,7 @@ PlaneNum = 0
 pz   = np.min(z0) - ZDistance
 
 ratio = 1.5
+ratio = 1.5
 
 ylayers = round( (np.max(data[:,1]) - np.min(data[:,1]))/YDistance )       # 四舍五入
 zlayers = round( (np.max(data[:,2]) - np.min(data[:,2]))/ZDistance ) + 1
@@ -145,13 +146,14 @@ for i in range(zlayers):
         if( z0[j]< pz+ratio*ZDistance and z0[j]> pz):
             planex.append( x0[j] ); planey.append( y0[j] ); planez.append( z0[j] )
             dataplane.append(data[j])
-            AtomPosiZlayer.append( j )
+            AtomPosiZlayer.append( atomtype[j] )
+    
 
     PlaneNum = PlaneNum + 1
     print(linecommon, "PlaneNum = ", PlaneNum)
     if(flag_plane == 'y'):
         dumpfile = "dump.plane."+str(PlaneNum)
-        DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[AtomPosiZlayer], planex, planey,planez)
+        DumpOutput(dumpfile, xlim, ylim, zlim, AtomPosiZlayer, planex, planey,planez)
     
     # the beginning position is the higest z of current plane
     pz = np.max(planez)
@@ -167,9 +169,8 @@ for i in range(zlayers):
 #       below plane; above plane
 #========================================================================
         half1 = []; half2 = []
-        # x = []; y = []; z = []
+        atomx = []; atomy = []; atomz = []
         above = []
-        # AtomsDisloc = []
 
         for l in range(len(dataplane)):
             if( dataplane[l][1] < py+ratio*YDistance and dataplane[l][1]>= py):
@@ -178,12 +179,11 @@ for i in range(zlayers):
                 else:
                     half2.append(dataplane[l])
                     above.append(dataplane[l][1])
-                # x.append( dataplane[l][0] )
-                # y.append( dataplane[l][1] )
-                # z.append( dataplane[l][2] )
-                AtomsDisloc = half1+half2
-                AtomsDisloc = np.array(AtomsDisloc)
-                position.append(l)
+                atomx.append( dataplane[l][0] )
+                atomy.append( dataplane[l][1] )
+                atomz.append( dataplane[l][2] )
+                position.append(AtomPosiZlayer[l])
+                
 
         py = np.min(above)
         len_above = len(half2)
@@ -192,10 +192,7 @@ for i in range(zlayers):
         if( len_below == len_above ):
             continue
         elif( len_below ==0 or len_above ==0):
-            print(linecommon)
             print("one atom layer is empty!")
-            print("py = ", py)
-            print("ylim = ", ylim)
             print(linecommon)
             exit()
         else:
@@ -210,7 +207,7 @@ for i in range(zlayers):
             #====================================================================================
             if(flag_disloc == 'y'):
                 dumpfile = 'dump.plane'+str(PlaneNum) +".Disloc"+str(DislocNum)
-                DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[position], AtomsDisloc[:,0], AtomsDisloc[:,1], AtomsDisloc[:,2] )
+                DumpOutput(dumpfile, xlim, ylim, zlim, position, atomx, atomy, atomz )
         
         #====================================================================================
         #                  fitting disloc position
@@ -238,8 +235,8 @@ for i in range(zlayers):
 
         # get index of the density_max and then get corresponded atoms_above value
         x_calculated = atoms_disreg[list(disregistry).index(density_max)]
-        y_calculated = np.mean( AtomsDisloc[:,1] )
-        z_calculated = np.mean( AtomsDisloc[:,2] )
+        y_calculated = np.mean( atomy )
+        z_calculated = np.mean( atomz )
 
         f = open('disregistry.plane' + str(PlaneNum) +'Dis' +str(DislocNum)+'.dat', 'w')
         for k in range(len(disregistry)):
@@ -277,7 +274,7 @@ for i in range(zlayers):
 #============================================================================================
         line1 = '%4i %8i' %(PlaneNum, DislocNum)
         line2 = '%14.8f %14.8f %14.8f %14.8f ' %(b_calculated, x_calculated, y_calculated, z_calculated)
-        line3 = '%14.8f %14.8f %6.2f' %( mean, width, 100*(y_calculated-ylo)/(yhi-ylo))
+        line3 = '%20.8f %14.8f %10.2f' %( mean, width, 100*(y_calculated-ylo)/(yhi-ylo))
         line  = line1 + line2 +line3 +'\n'
         Info.write(line)
 Info.close
