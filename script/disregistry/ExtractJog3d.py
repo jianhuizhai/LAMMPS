@@ -1,4 +1,4 @@
-'''This code is used to extract plane along dislocation direction'''
+'''This code is used to extract plane along dislocation direction for slip system [110](1-10)'''
 '''This code is for edge dislocation.'''
 '''Dislocation glide in xy plane, line direction is y. Burgurs vector along x direction.'''
 #========================================================================================
