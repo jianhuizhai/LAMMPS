@@ -1,6 +1,4 @@
-#===============================================================================================================
-# This code is used to fit diregistry data by using two arctan function which is suitable to wide spread core
-#===============================================================================================================
+'''This code is used to fit diregistry data by using two arctan function which is suitable to wide spread core'''
 
 import numpy as np
 from scipy.optimize import curve_fit
