@@ -1,3 +1,5 @@
+'''This code is to make the ions with charge'''
+
 import numpy as np
 import sys
 
