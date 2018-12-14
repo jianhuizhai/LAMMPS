@@ -1,3 +1,5 @@
+'''This code is used to consider elastic interaction for neb calculation'''
+
 import os
 from search import SearchFile
 import numpy as np
