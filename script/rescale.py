@@ -1,3 +1,5 @@
+'''This code is useful by constructing dislocation configuration by using method in Computer Simulations of Dislocations'''
+
 import sys
 import numpy as np
 
