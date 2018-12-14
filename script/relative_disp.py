@@ -1,3 +1,5 @@
+'''This code is to calculate the relative displacement which is useful to determine the box size for GSF calculation'''
+
 import numpy as np
 import sys
 import matplotlib.pylab as plt
