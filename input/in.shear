@@ -39,7 +39,7 @@ variable length equal "ly"
 variable disp equal 0.001*${length}
 
 dump 1 all custom 50 dump.shear.*  id type element xu yu zu c_peratom c_virial[1] c_virial[2] c_virial[3] c_virial[4] c_virial[5] c_virial[6] v_ptrace
-dump_modify     1 sort id element Mg O
+dump_modify     1 sort id element Mg O format float %25.16e
 
 label forloop
   # the beginning value of a is 1; end value of a is 4.
