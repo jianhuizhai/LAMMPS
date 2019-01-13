@@ -36,7 +36,7 @@ thermo_modify format 2 %16.8f
 
 # dump outputs
 dump 1 all custom 100 dump.relax*  id type element xu yu zu c_peratom c_virial[1] c_virial[2] c_virial[3] c_virial[4] c_virial[5] c_virial[6] v_ptrace
-dump_modify     1 sort id element Mg O
+dump_modify     1 sort id element Mg O format float %25.16e
 
 # min_style
 min_style       cg
