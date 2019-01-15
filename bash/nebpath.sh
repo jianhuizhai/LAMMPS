@@ -147,7 +147,7 @@ if [ "$Nfiles" -gt "0" ] ; then
       fi
       # Normalize all energies to energy of image #0
       energy=$(echo "$energy - $eref" | bc -l)
-      printf "%.4f \t %.4f \n" $img $energy >> $outfile
+      printf "%.6f \t %.6f \n" $img $energy >> $outfile
     done
 
   fi
@@ -169,7 +169,7 @@ if [ ! -e $outfile ] ; then
   
   # Normalize NEB path, write it to outfile
   eref=$(head -n 1 tmpfile | awk '{print $2}')
-  awk -v e=$eref '{printf "%.4f \t %.4f \n", $1, $2-(e)}' tmpfile >> $outfile
+  awk -v e=$eref '{printf "%.6f \t %.6f \n", $1, $2-(e)}' tmpfile >> $outfile
   
   rm -f tmpfile
   
