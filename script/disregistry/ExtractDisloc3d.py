@@ -1,4 +1,4 @@
-'''This code is used to extract plane along dislocation direction for slip sytem [110](1-10)'''
+'''This code is used to extract plane along dislocation direction'''
 '''This code is for edge dislocation.'''
 '''Dislocation glide in xz plane, line direction is z. Burgurs vector along x direction.'''
 #========================================================================================
@@ -148,7 +148,6 @@ for i in range(zlayers):
             dataplane.append(data[j])
             AtomPosiZlayer.append( atomtype[j] )
     
-
     PlaneNum = PlaneNum + 1
     print(linecommon, "PlaneNum = ", PlaneNum)
     if(flag_plane == 'y'):

@@ -1,4 +1,4 @@
-'''This code is used to extract plane along dislocation direction for slip system [110](1-10)'''
+'''This code is used to extract plane along dislocation direction'''
 '''This code is for edge dislocation.'''
 '''Dislocation glide in xy plane, line direction is y. Burgurs vector along x direction.'''
 #========================================================================================
@@ -18,14 +18,17 @@ import matplotlib.pylab as plt
 #======================================================================================
 #       define objective function to fit disregistry and density of disregistry
 #======================================================================================
-def func(x, b, alpha, mean1,width1,mean2, width2):
-    return 0.5*b + b/np.pi*( alpha *np.arctan( (x-mean1)/width1 ) + 0.5*(1-alpha)*np.arctan( (x-mean1-mean2)/width2) + \
-    0.5*(1-alpha)*np.arctan( (x-mean1+mean2)/width2))
-def rho(x,b, alpha, mean1, width1, mean2, width2):
-    return b/np.pi*( alpha * width1/(np.power(x-mean1,2)+ np.power(width1,2)) + \
-    0.5*(1-alpha)* width2/( np.power(x-mean1-mean2,2) + np.power(width2,2)) + \
-    0.5*(1-alpha)* width2/( np.power(x-mean1+mean2,2) + np.power(width2,2)))
-
+#def func(x, b, alpha, mean1,width1,mean2, width2):
+#    return 0.5*b + b/np.pi*( alpha *np.arctan( (x-mean1)/width1 ) + 0.5*(1-alpha)*np.arctan( (x-mean1-mean2)/width2) + \
+#    0.5*(1-alpha)*np.arctan( (x-mean1+mean2)/width2))
+#def rho(x,b, alpha, mean1, width1, mean2, width2):
+#    return b/np.pi*( alpha * width1/(np.power(x-mean1,2)+ np.power(width1,2)) + \
+#    0.5*(1-alpha)* width2/( np.power(x-mean1-mean2,2) + np.power(width2,2)) + \
+#    0.5*(1-alpha)* width2/( np.power(x-mean1+mean2,2) + np.power(width2,2)))
+def func(x ,mean, width):
+    return b_calculated/np.pi*np.arctan((x-mean)/width)+b_calculated/2
+def rho(x , mean, width):
+    return b_calculated/np.pi*width/(np.power(x-mean,2)+ np.power(width,2))
 #======================================================================================
 #                       specify the filename in the terminal
 linecommon = '=========================================================\n'
@@ -40,13 +43,13 @@ if not os.path.isfile(filename):
 pressure = int(input("type the pressure of system: (100, 60, 30 or 0 -- units in GPa)"+"\n"))
 
 if(pressure == 100):
-    alat = 3.83
+    alat = 3.82776
 elif(pressure == 60):
-    alat = 3.94
+    alat = 3.9355
 elif(pressure == 30):
-    alat = 4.05
+    alat = 4.047
 elif(pressure == 0):
-    alat = 4.22
+    alat = 4.218
 else:
     print("The pressure is not included in the code.")
     exit()
@@ -128,7 +131,7 @@ line = 'Info about disloc'+'\n'
 Info.write(line)
 Info.write(linecommon)
 line1 = 'PlaneNum   DislocNum       calculated properties(b_c, x_c, y_c, z_c)            '
-line2 = 'fitting properties(b, alpha, x1, width1, x2, width2)                         Percent(%) \n'
+line2 = 'fitting properties(mean, width)     Percent(%) \n'
 line  = line1 + line2 + '\n'
 Info.write(line)
 #======================================================================
@@ -242,17 +245,13 @@ for i in range(LineLayers):
 #=========================================================================================
 #                              curve fitting 
 #=========================================================================================
-        popt, pcov = curve_fit(func, atoms_disreg, disregistry, p0=[b_calculated, 0.5, x_calculated, 1.7, 0.25*x_calculated, 2.0])
-        b    = popt[0]
-        alpha = popt[1]
-        mean1 = popt[2]
-        width1 = popt[3]
-        mean2  = popt[4]
-        width2 = popt[5]
+        popt, pcov = curve_fit(func, atoms_disreg, disregistry)
+        mean = popt[0]
+        width= popt[1]
 
         x=[i for i in np.arange(0.,np.max(atoms_disreg),0.1)]
         x = np.array(x)
-        yvals=func(x, b, alpha, mean1,width1,mean2,width2)
+        yvals=func(x, mean, width)
 
         fig, ax1 = plt.subplots(figsize=(18.5,10.5))
         ax1.plot( atoms_disreg, disregistry, 'o', label='data')
@@ -264,7 +263,7 @@ for i in range(LineLayers):
 
         ax2 = ax1.twinx()
         rho2 = np.vectorize(rho)
-        ax2.plot(x, rho2(x, b, alpha, mean1, width1, mean2, width2), 'blue', linewidth=3.0, label ='density')
+        ax2.plot(x, rho2(x, mean, width), 'blue', linewidth=3.0, label ='density')
         ax2.set_ylabel(r'$\rho$', color='blue')
         ax2.tick_params('y', colors='blue')
         fig.tight_layout()
@@ -274,7 +273,7 @@ for i in range(LineLayers):
 #============================================================================================
         line1 = '%4i %8i' %(PlaneNum, DislocNum)
         line2 = '%14.8f %14.8f %14.8f %14.8f ' %(b_calculated, x_calculated, y_calculated, z_calculated)
-        line3 = '%14.8f %12.8f %14.8f %14.8f %14.8f %14.8f %6.2f' %(b, alpha, mean1, width1, mean2, width2, 100*(y_calculated-ylo)/(yhi-ylo))
+        line3 = '%20.8f %14.8f %12.2f' %(mean, width, 100*(y_calculated-ylo)/(yhi-ylo))
         line  = line1 + line2 +line3 +'\n'
         Info.write(line)
 Info.close
