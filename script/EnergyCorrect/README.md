@@ -2,4 +2,4 @@
 
 1. First use PositionEvolution.py and search.py to determine dislocation position during neb path.
 
-2. Second use EnerpyPosition.py plot energy in reaction coordinate and with babel, linear, quadratic correction.
+2. Second use EnerpyPosition.py plot energy in reaction coordinate and with babel, linear, quadratic correction. (For babel correction, you should use babel to calculate elastic interaction.)
