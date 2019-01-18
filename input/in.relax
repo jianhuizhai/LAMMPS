@@ -5,7 +5,13 @@ boundary        p p p
 
 # read data
 atom_style      charge
-read_data       dipole40_used.lmp
+read_data       dipole.lmp
+
+# atom properties
+group Mg type 1
+group O  type 2
+set group Mg charge 1.7
+set group O  charge -1.7
 
 #Buckingham potential
 pair_style      buck/coul/long 12.0
@@ -25,11 +31,11 @@ variable ptrace atom  -(c_virial[1]+c_virial[2]+c_virial[3])/3
 
 # thermo outputs
 thermo      50
-thermo_style custom step pe lx ly lz xy press pxx pyy pzz
+thermo_style custom step pe lx ly lz xy press pxx pyy pzz pxy pxz pyz
 thermo_modify format 2 %16.8f
 
 # dump outputs
-dump 1 all custom 100 dump.relax.*  id type element xu yu zu c_peratom c_virial[1] c_virial[2] c_virial[3] c_virial[4] c_virial[5] c_virial[6] v_ptrace
+dump 1 all custom 1000 dump.relax*  id type element xu yu zu 
 dump_modify     1 sort id element Mg O format float %25.16e
 
 # min_style
@@ -43,10 +49,12 @@ label forloop
     minimize   0.0 1.0e-9 5000 10000
 
     # minimization under constant pressure
-    fix         1 all box/relax aniso 0.0 vmax 0.001
+    fix         1 all box/relax aniso *e4 vmax 0.001
     minimize        0.0 1.0e-9 5000 10000
     unfix    1
     next a
 jump in.relax forloop
+
+minimize 0.0 1.0e-9 5000 10000
 
 print "All done"
