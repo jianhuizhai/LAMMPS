@@ -54,7 +54,7 @@ elif(pressure == 0):
     alat = 4.218
 else:
     print("The pressure is not included in the code.")
-    exit()
+    alat = float(input("Type lattice parameter : \n"))
 print(linecommon)
 
 #=======================================================================================
