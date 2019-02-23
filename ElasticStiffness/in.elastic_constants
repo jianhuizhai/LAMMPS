@@ -31,7 +31,7 @@ thermo		10
 thermo_style custom step temp pe press pxx pyy pzz pxy pxz pyz lx ly lz vol
 
 # initial minimization
-fix 3 all box/relax  aniso 0.0e5 vmax 0.001
+fix 3 all box/relax  aniso 0.0e4 vmax 0.001
 min_style       cg
 minimize        ${etol} ${ftol} ${maxiter} ${maxeval}
 
