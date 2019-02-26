@@ -1,0 +1,6 @@
+type
+Co 1
+Fe 2
+Ni 3
+Cr 4
+Mn 5
