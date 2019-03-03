@@ -30,8 +30,8 @@ oldfile = open(OldFileName,'r')
 
 for i in range(skipline):
     line = oldfile.readline()
-    if(i == 3):
-        line = line.replace("1","5") # There are 5 atom types.
+    #if(i == 3):
+    #    line = line.replace("1","5") # There are 5 atom types.
     newfile.write(line)
 
 oldfile.close()
