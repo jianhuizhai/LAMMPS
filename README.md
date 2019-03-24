@@ -5,3 +5,4 @@ This folder contains the examples of LAMMPS and some useful programming codes or
 * bash contains the log2dat.sh and nebpath.sh;
 * input contains LAMMPS input files (*.in);
 * script contains Build (construct dislocation dipole), EnergyCorrect (correct dislocation interaction in neb calcu), climb (construct dislocation jog config) and disregistry (obtains disregistry and its density) folders. The description file is in each folder.
+* charge contains the files to calulate charge density and integrate charge density in a specified reion.
