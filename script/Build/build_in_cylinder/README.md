@@ -1,4 +1,4 @@
-# The files in this folder is used to automatically selected atoms in the cylinder
+# The files in this folder are used to automatically selected atoms in the cylinder
 
 * generate_deleted.py is used to genrate deleted.dat which contains the atoms info those already deleted.
 
