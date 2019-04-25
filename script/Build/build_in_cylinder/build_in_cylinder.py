@@ -16,29 +16,38 @@ def mk_build( filename, deleted_atom, atom_delete, atom_id ):
     f.write(line)
     line = 'rm -f noclimb.lmp initial.lmp \n'
     f.write(line)
+    
+    '''
     line = 'n=5 \n'
     f.write(line)
     line = 'n4=$(echo "4*$n" | bc -l) \n'
     f.write(line)
     line = 'atomsk /home/jianhui/LASCO/MgO/edge_110/calculations/jog/0GPa/unit_collection/climb0.lmp -duplicate 1 1 $n4 noclimb.lmp \n'
     f.write(line)
+    '''
 
     len_deleted = len(deleted_atom)
-    str_line = 'atomsk noclimb.lmp '
-    if( len_deleted <= 10):
-        line1    = '-select ' + ','.join(str(int(i)) for i in deleted_atom ) + ' -rmatom select '
+    str_line = 'atomsk ../noclimb.lmp '
+    if( len_deleted <= 17):
+        #line1    = '-select ' + ','.join(str(int(i)) for i in deleted_atom ) + ' -rmatom select '
+        line1    = '-select ' + ','.join(str(int(i)) for i in deleted_atom )
         str_line = str_line + line1
     else:
-        repeat = int( ceil(len_deleted/10) )
+        # a mention to change the input file (noclimb.lmp file)
+        exit("The number of deleted atoms are already 18.") 
+        '''
+        repeat = int( ceil(len_deleted/18) )
         
         for i in range(repeat):
-            line1 = '-select ' + ','.join(str(int(k)) for k in deleted_atom[10*i:10*i+10] ) + ' -rmatom select '
+            #line1 = '-select ' + ','.join(str(int(k)) for k in deleted_atom[10*i:10*i+10] ) + ' -rmatom select '
+            line1 = '-select ' + ','.join(str(int(k)) for k in deleted_atom[10*i:10*i+10] )
             str_line = str_line + line1
+        '''   
     if( len(deleted_atom)%2 == 0 ):
-        line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 initial.lmp \n' %( int(atom_id), atom_delete )
+        line = str_line + ',%i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 initial.lmp \n' %( int(atom_id), atom_delete )
         print(line)
     elif( len(deleted_atom)%2 == 1):
-        line = str_line+'-select %i -rmatom select initial.lmp \n' %( int(atom_id) )
+        line = str_line+',%i -rmatom select initial.lmp \n' %( int(atom_id) )
         print(line)
     f.write(line)
     line = 'lmp_atom2charge.sh initial.lmp \n'
@@ -63,10 +72,19 @@ elif(atom_delete == 'O'):
 else:
     exit("Unkown deleted ion type!")
 
+radius = float(input("The radius of cylinder (3 or 2.5) : "))
+
+#==================================================================================
 ions=[]
-#print('ions = ', ions)
+
+print(linecommon)
+print("lmp_file : noclimb.lmp")
+print("dat_file : deleted.dat")
+print("loading files ...")
+
 atomid, atom_type, x, y, z  = np.loadtxt('noclimb.lmp', skiprows=16, usecols=(0,1,2,3,4), unpack=True)
 deleted_atom, x_d, y_d, z_d = np.loadtxt('deleted.dat', usecols=(0,2,3,4), unpack=True)
+atomid = np.array(atomid, dtype = int)
 
 xc = np.mean(x_d)
 yc = np.mean(y_d)
@@ -87,12 +105,14 @@ test_info = open('distribution.dat', 'w')
 line = '%10i %8i %20.8f %20.8f %20.8f \n' %(0, 0, xc, yc, zc )
 test_info.write(line)
 
+
+
 for i in range(len(atomid)):
     if(atom_type[i] == delete_type):
         if ( all( [atomid[i] != deleted_atom[k] for k in range(len(deleted_atom))] ) ):
         #if(abs(z[i] - zc) <= 5.0):
             r2 = (x[i] - xc)**2 + (y[i] - yc)**2
-            if(r2 <= 9 and z[i] <= z_max+2.2 and z[i] >= z_min -2.2 ):
+            if(r2 <= radius**2 and z[i] <= z_max + 4.4 and z[i] >= z_min - 4.4 ):
                 ions.append( atomid[i] )
                 line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
                 test_info.write(line)
@@ -140,7 +160,7 @@ print("=============================================================")
 flag     = input("Do you want to clean earlier results          (y or n) \n \
 This will delete all the folders in current folder.   : ")
 
-
+os.system('rm -f energy_info.dat')
 if(flag == 'y'):
     for folder in os.listdir():
         if(os.path.isdir(folder)):
