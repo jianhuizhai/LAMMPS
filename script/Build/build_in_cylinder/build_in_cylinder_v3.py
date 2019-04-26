@@ -177,9 +177,9 @@ if(flag_floder == 'y'):
         if(os.path.isdir(folder)):
             if(folder != 'reference' and folder != '__pycache__' and folder != 'v_mg' and folder != 'v_o'):
                 if( all( [folder != str(k) for k in ions ] ) ):
-                        os.system('rm -r '+folder)
-                    else:
-                        os.system('bash ~/bin/clean.sh')
+                    os.system('rm -r '+folder)
+                else:
+                    os.system('bash ~/bin/clean.sh')
 
 for atom in ions:
     print('atom id is : ', atom)
