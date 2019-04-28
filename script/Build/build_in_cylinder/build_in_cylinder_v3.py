@@ -51,6 +51,7 @@ print(linecommon)
 print("load deleted.dat")
 x_d, y_d, z_d = np.loadtxt('deleted.dat', usecols=(1,2,3), unpack=True)
 
+'''
 #==================================================================================
 #                   cd the folder which has the lowest energy
 #==================================================================================
@@ -58,7 +59,7 @@ parent_folder = np.loadtxt('energy_info.dat',dtype=int, usecols=(0))[0]
 #print(str(parent_folder))
 os.chdir( str(parent_folder) )
 print(os.getcwd())
-
+'''
 #==================================================================================
 print(linecommon)
 atom_delete = input("The deleted ion type : " ).lower()
@@ -176,10 +177,17 @@ if(flag_floder == 'y'):
     for folder in os.listdir():
         if(os.path.isdir(folder)):
             if(folder != 'reference' and folder != '__pycache__' and folder != 'v_mg' and folder != 'v_o'):
+                os.system('rm -r '+folder)
+
+                '''
                 if( all( [folder != str(k) for k in ions ] ) ):
                     os.system('rm -r '+folder)
                 else:
+                    os.chdir( folder )
+                    print(os.getcwd())
                     os.system('bash ~/bin/clean.sh')
+                    print(os.getcwd())
+                '''
 
 for atom in ions:
     print('atom id is : ', atom)
@@ -188,7 +196,9 @@ for atom in ions:
         os.mkdir( folder )
         os.chdir( folder )
         print(os.getcwd())
-        mk_build( filename, len(atomid), atom_delete, folder )   # generate build_noclimb.sh file to generate initial.lmp
+
+        # generate build_noclimb.sh file to generate initial.lmp
+        mk_build( filename, len(atomid), atom_delete, folder )
 
         os.system('bash '+filename)
         os.system('cp ~/bin/in.relax_atom .')
