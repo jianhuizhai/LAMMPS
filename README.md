@@ -7,3 +7,4 @@ This folder contains the examples of LAMMPS and some useful programming codes or
 * charge contains the files to calulate charge density and integrate charge density in a specified reion;
 * input contains LAMMPS input files (*.in);
 * script contains Build (construct dislocation dipole), EnergyCorrect (correct dislocation interaction in neb calcu), climb (construct dislocation jog config) and disregistry (obtains disregistry and its density) folders. The description file is in each folder.
+* extract contains the files are used to extract data.
