@@ -83,8 +83,6 @@ elif(atom_delete == 'o'):
 else:
     exit("Unkown deleted ion type!")
 
-radius = float(input("The radius of cylinder (3 or 2.5) : "))
-
 #==================================================================================
 
 print(linecommon)
@@ -132,7 +130,7 @@ zc = np.mean(z_d)
 z_max = np.max(z_d)
 z_min = np.min(z_d)
 line = '#ovito initial.lmp \n'
-    f.write(line)
+
 print(linecommon)
 print("xc = ", xc)
 print("yc = ", yc)
@@ -141,8 +139,8 @@ print("zc = ", zc)
 #==================================================================================================
 #                   open a file and write the atom id (meet the critia) to it
 #==================================================================================================
-
-z_distance = 0.5*len(x_d) * 4.218
+radius     = 2.5
+z_distance = 0.5*len(x_d) * 4.218 - 4.218
 while True:
     ions=[]
     test_info = open('distribution.dat', 'w')
@@ -185,7 +183,9 @@ while True:
     if(flag == 'y'):
         break
     else:
+        print("Earlier   radius   is ", radius)
         print("Earlier z_distance is ", z_distance)
+        radius     = float(input("The   radius   : "))
         z_distance = float(input("The z_distance : "))
 
 #====================================================================================================
