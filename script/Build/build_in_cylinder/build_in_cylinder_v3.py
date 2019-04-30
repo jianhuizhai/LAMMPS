@@ -9,7 +9,7 @@ from mpl_toolkits import mplot3d
 #==================================================================================
 #                 define a function to create build.sh in specified folder
 #==================================================================================
-def mk_build( filename, length, atom_delete, atom_id ):
+def mk_build( filename, length, flag_interstitial, atom_delete, atom_id ):
     
     os.system('touch '+filename)
     f = open(filename,'w')
@@ -28,11 +28,17 @@ def mk_build( filename, length, atom_delete, atom_id ):
     '''
 
     str_line = 'atomsk ../relax.lmp '
-    if( length%2 == 0 ):
-        line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 initial.lmp \n' %( int(atom_id), atom_delete )
+    if( length%2 == 0):
+        if flag_interstitial != 2:
+            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 initial.lmp \n' %( int(atom_id), atom_delete )
+        elif flag_interstitial ==2:
+            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 initial.lmp \n' %( int(atom_id), atom_delete, atom_delete )
         print(line)
     elif( length%2 == 1 ):
-        line = str_line+'-select %i -rmatom select initial.lmp \n' %( int(atom_id) )
+        if flag_interstitial != 2:
+            line = str_line+'-select %i -rmatom select initial.lmp \n' %( int(atom_id) )
+        elif flag_interstitial ==2:
+            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 initial.lmp \n' %( int(atom_id), atom_delete, atom_delete )
         print(line)
     else:
         exit("Unkown flag interstitial.")
@@ -73,7 +79,6 @@ else:
 radius = float(input("The radius of cylinder (3 or 2.5) : "))
 
 #==================================================================================
-ions=[]
 
 print(linecommon)
 bash_return, dumpfile = subprocess.getstatusoutput('(ls -t dump.relax* | head -n 1)')
@@ -101,7 +106,7 @@ line = '#! /bin/bash \n'
 f.write(line)
 line = 'rm -f relax.lmp\n'
 f.write(line)
-line = 'atomsk ../'+dumpfile+' -select in sphere 224.855 150.6465 82.2513 1.0 -rmatom select relax.lmp \n'
+line = 'atomsk ../'+dumpfile+' -select in cylinder z 224.855 150.6465 1.0 -rmatom select relax.lmp \n'
 f.write(line)
 f.close()
 os.system('bash build_relax.sh')
@@ -128,66 +133,77 @@ print("zc = ", zc)
 #==================================================================================================
 #                   open a file and write the atom id (meet the critia) to it
 #==================================================================================================
-test_info = open('distribution.dat', 'w')
-line = '%10i %8i %20.8f %20.8f %20.8f \n' %(0, 0, xc, yc, zc )
-test_info.write(line)
 
-for i in range(len(atomid)):
-    if(atom_type[i] == delete_type):
-        r2 = (x[i] - xc)**2 + (y[i] - yc)**2
-        if(r2 <= radius**2 and z[i] <= z_max + 8.5 and z[i] >= z_min - 8.5 ):
-            ions.append( atomid[i] )
-            line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
-            test_info.write(line)
-line = '# %12i \n' %len(ions)
-test_info.write(line)
-test_info.close()
+z_distance = 0.5*len(x_d) * 4.218
+while True:
+    ions=[]
+    test_info = open('distribution.dat', 'w')
+    line = '%10i %8i %20.8f %20.8f %20.8f \n' %(0, 0, xc, yc, zc )
+    test_info.write(line)
 
-print(linecommon)
-print("Write distribution.dat")
-print("The selected number of ions are : ", len(ions))
+    for i in range(len(atomid)):
+        if(atom_type[i] == delete_type):
+            r2 = (x[i] - xc)**2 + (y[i] - yc)**2
+            if(r2 <= radius**2 and z[i] <= z_max + z_distance and z[i] >= z_min - z_distance ):
+                ions.append( atomid[i] )
+                line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
+                test_info.write(line)
+    line = '# %12i \n' %len(ions)
+    test_info.write(line)
+    test_info.close()
+
+    print(linecommon)
+    print("Write distribution.dat")
+    print("The selected number of ions are : ", len(ions))
 
 #====================================================================================================
 #               plot the chosen ions type
 #====================================================================================================
-print(linecommon)
-print("Plot point distribution")
+    print(linecommon)
+    print("Plot point distribution")
 
-data = np.loadtxt('distribution.dat')
-ax = plt.axes(projection='3d')
-#ax.scatter(x, y, z, c='r')  # 绘制数据点,颜色是红色
-#plt.scatter(data[:,2],data[:,3], data[:,4], cmap='coolwarm')
-ax.scatter3D(data[:,2],data[:,3], data[:,4], c=data[:,1], cmap='coolwarm')
-#cb = plt.colorbar(scatters, pad=0.01)
-plt.xlim(xc - 4*radius, xc+4*radius)
-plt.ylim(yc - 4*radius, yc+4*radius)
+    data = np.loadtxt('distribution.dat')
+    ax = plt.axes(projection='3d')
+    #ax.scatter(x, y, z, c='r')  # 绘制数据点,颜色是红色
+    #plt.scatter(data[:,2],data[:,3], data[:,4], cmap='coolwarm')
+    ax.scatter3D(data[:,2],data[:,3], data[:,4], c=data[:,1], cmap='coolwarm')
+    #cb = plt.colorbar(scatters, pad=0.01)
+    plt.xlim(xc - 4*radius, xc+4*radius)
+    plt.ylim(yc - 4*radius, yc+4*radius)
 
-plt.savefig('point_distribution.pdf')
-plt.show()
+    plt.savefig('point_distribution.pdf')
+    plt.show()
+    flag = input("Do you satisfy the point distribution (y or n) : ")
+    if(flag == 'y'):
+        break
+    else:
+        print("Earlier z_distance is ", z_distance)
+        z_distance = float(input("The z_distance : "))
 
 #====================================================================================================
 filename = 'build_noclimb.sh'
 print(linecommon)
 
 os.system('ls')
-flag_floder     = input("Do you want to clean earlier results          (y or n) \n \
-This will delete all the folders in current folder.   : ")
+print(linecommon)
 
-if(flag_floder == 'y'):
-    for folder in os.listdir():
-        if(os.path.isdir(folder)):
-            if(folder != 'reference' and folder != '__pycache__' and folder != 'v_mg' and folder != 'v_o'):
+#flag_floder     = input("Do you want to clean earlier results          (y or n) \n \
+#This will delete all the folders in current folder.   : ")
+flag_interstitial= int( input("How many interstitial do you want to add (0--1--2 ) : ") )
+
+#if(flag_floder == 'y'):
+for folder in os.listdir():
+    if(os.path.isdir(folder)):
+        if(folder != 'reference' and folder != '__pycache__' and folder != 'v_mg' and folder != 'v_o'):
+            #os.system('rm -r '+folder)
+            if( all( [folder != str(k) for k in ions ] ) ):
                 os.system('rm -r '+folder)
-
-                '''
-                if( all( [folder != str(k) for k in ions ] ) ):
-                    os.system('rm -r '+folder)
-                else:
-                    os.chdir( folder )
-                    print(os.getcwd())
-                    os.system('bash ~/bin/clean.sh')
-                    print(os.getcwd())
-                '''
+            else:
+                os.chdir( folder )
+                print(os.getcwd())
+                os.system('bash ~/bin/clean.sh')
+                os.chdir("../")
+                print(os.getcwd())
 
 for atom in ions:
     print('atom id is : ', atom)
@@ -198,10 +214,10 @@ for atom in ions:
         print(os.getcwd())
 
         # generate build_noclimb.sh file to generate initial.lmp
-        mk_build( filename, len(atomid), atom_delete, folder )
+        mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
 
         os.system('bash '+filename)
         os.system('cp ~/bin/in.relax_atom .')
         os.system('cp ~/bin/job_relax.slurm .')
         os.chdir("../")
-        print(os.getcwd())
+print(os.getcwd())
