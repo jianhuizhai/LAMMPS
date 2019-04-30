@@ -206,18 +206,19 @@ for folder in os.listdir():
                 print(os.getcwd())
 
 for atom in ions:
+    print(linecommon)
     print('atom id is : ', atom)
     folder = str(atom)
     if(not os.path.exists( folder )):
         os.mkdir( folder )
-        os.chdir( folder )
-        print(os.getcwd())
+    os.chdir( folder )
+    print(os.getcwd())
 
-        # generate build_noclimb.sh file to generate initial.lmp
-        mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
+    # generate build_noclimb.sh file to generate initial.lmp
+    mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
 
-        os.system('bash '+filename)
-        os.system('cp ~/bin/in.relax_atom .')
-        os.system('cp ~/bin/job_relax.slurm .')
-        os.chdir("../")
+    os.system('bash '+filename)
+    os.system('cp ~/bin/in.relax_atom .')
+    os.system('cp ~/bin/job_relax.slurm .')
+    os.chdir("../")
 print(os.getcwd())
