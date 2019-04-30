@@ -48,10 +48,17 @@ def mk_build( filename, length, flag_interstitial, atom_delete, atom_id ):
     line = '#ovito initial.lmp \n'
     f.write(line)
 
+    # copy files
+    line = 'cp ~/bin/in.relax_atom . \n'
+    f.write(line)
+    line = 'cp ~/bin/job_relax.slurm . \n'
+    f.write(line)
+    
+
     f.close()
 
 #==================================================================================
-linecommon = "=========================================================================="
+linecommon = "==============================================================================================="
 
 print(linecommon)
 print("load deleted.dat")
@@ -124,7 +131,8 @@ zc = np.mean(z_d)
 
 z_max = np.max(z_d)
 z_min = np.min(z_d)
-
+line = '#ovito initial.lmp \n'
+    f.write(line)
 print(linecommon)
 print("xc = ", xc)
 print("yc = ", yc)
@@ -218,7 +226,9 @@ for atom in ions:
     mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
 
     os.system('bash '+filename)
+    '''
     os.system('cp ~/bin/in.relax_atom .')
     os.system('cp ~/bin/job_relax.slurm .')
+    '''
     os.chdir("../")
 print(os.getcwd())
