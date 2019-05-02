@@ -149,7 +149,7 @@ while True:
 
     for i in range(len(atomid)):
         if(  atom_type[i] == delete_type  ):
-            if y[i] >= yc - 1.0 and y[i]<= yc + 2.5:
+            if y[i] >= yc - 0.2 and y[i]<= yc + 2.5:
                 r2 = (x[i] - xc)**2 + (y[i] - yc)**2
                 if(r2 <= radius**2 and z[i] <= z_max + z_distance and z[i] >= z_min - z_distance ):
                     ions.append( atomid[i] )
