@@ -139,8 +139,8 @@ print("zc = ", zc)
 #==================================================================================================
 #                   open a file and write the atom id (meet the critia) to it
 #==================================================================================================
-radius     = 2.5
-z_distance = 0.5*len(x_d) * 4.218 - 4.218
+radius     = 3.0
+z_distance = (0.5*len(x_d)-2) * 4.218
 while True:
     ions=[]
     test_info = open('distribution.dat', 'w')
@@ -148,12 +148,13 @@ while True:
     test_info.write(line)
 
     for i in range(len(atomid)):
-        if(atom_type[i] == delete_type):
-            r2 = (x[i] - xc)**2 + (y[i] - yc)**2
-            if(r2 <= radius**2 and z[i] <= z_max + z_distance and z[i] >= z_min - z_distance ):
-                ions.append( atomid[i] )
-                line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
-                test_info.write(line)
+        if(  atom_type[i] == delete_type  ):
+            if y[i] >= yc - 1.0 and y[i]<= yc + 2.5:
+                r2 = (x[i] - xc)**2 + (y[i] - yc)**2
+                if(r2 <= radius**2 and z[i] <= z_max + z_distance and z[i] >= z_min - z_distance ):
+                    ions.append( atomid[i] )
+                    line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
+                    test_info.write(line)
     line = '# %12i \n' %len(ions)
     test_info.write(line)
     test_info.close()
