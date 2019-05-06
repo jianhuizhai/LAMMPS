@@ -1,6 +1,9 @@
 import sys
 import numpy as np
 
+if len(sys.argv) < 2:
+    exit("Please provide a file to integrate charge")
+    
 filename = sys.argv[1]
 x, y, density = np.loadtxt(filename, skiprows=4, unpack=True)
 
