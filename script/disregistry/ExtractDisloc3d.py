@@ -35,14 +35,22 @@ def rho(x , mean, width):
 #======================================================================================
 linecommon = '=========================================================\n'
 
+if len(sys.argv) < 2:
+    exit("Please provide a dumpfile to extract dislocation position.")
+
 filename = sys.argv[1]
 if not os.path.isfile(filename):
-    print("The file is not existed!")
-    exit()
+    exit("The file is not existed!")
 #=======================================================================================
 #                        material parameter under different pressures
 #=======================================================================================
-pressure = int(input("type the pressure of system: (100, 60, 30 or 0 -- units in GPa)"+"\n"))
+while True:
+    pressure = input("type the pressure of system: (100, 60, 30 or 0 -- units in GPa)"+"\n")
+    if pressure.isdecimal():
+        pressure = int(float(pressure))
+        break
+    else:
+        print("The pressure should be a number!!")
 
 if(pressure == 100):
     alat = 3.82776
@@ -54,12 +62,20 @@ elif(pressure == 0):
     alat = 4.218
 else:
     print("The pressure is not included in the code.")
-    exit()
+    while True:
+        alat = input("Type lattice parameter : \n")
+        if alat.isdecimal():
+            alat = float(alat)
+            break
+        else:
+            print("The lattice parameter should be a number!!!")
+
 print(linecommon)
 
 #=======================================================================================
-flag_plane = input("Do you want to dump plane: (y or n) \n")
-flag_disloc= input("Do you want to dump dislocation: (y or n) \n")
+flag_plane  = input("Do you want to dump plane: (y or n) \n").lower()
+flag_disloc = input("Do you want to dump dislocation: (y or n) \n").lower()
+flag_picture= input("Do you want to plot picture of disregistry and its density: (y or n) \n").lower()
 print(linecommon)
 #=======================================================================================
 #        specify the distance between atoms in different directions
@@ -73,7 +89,6 @@ ZDistance = 0.5*alat
 #                               extract disloc
 #=======================================================================================
 
-
 xlim = linecache.getline(filename, 6)
 ylim = linecache.getline(filename, 7)
 zlim = linecache.getline(filename, 8)
@@ -86,13 +101,14 @@ print("xlim ", xlim, end='')
 print("ylim ", ylim, end='')
 print("zlim ", zlim)
 
-linecommon = '=========================================================\n'
 print(linecommon)
 
 #============================================================================
 skipline = 9
-atomtype = np.loadtxt(filename, skiprows=skipline, usecols=(1))
-data     = np.loadtxt(filename, skiprows=skipline, usecols=(3,4,5))
+
+data1     = np.loadtxt(filename, skiprows=skipline, usecols=(1,3,4,5))
+atomtype  = data1[:,0]
+data      = data1[:,1:4]
 
 x0 = data[:,0]; y0 = data[:,1]; z0 = data[:,2]
 
@@ -100,7 +116,6 @@ PlaneNum = 0
 
 pz   = np.min(z0) - ZDistance
 
-ratio = 1.5
 ratio = 1.5
 
 ylayers = round( (np.max(data[:,1]) - np.min(data[:,1]))/YDistance )       # 四舍五入
@@ -177,7 +192,7 @@ for i in range(zlayers):
                     half1.append( dataplane[l] )
                 else:
                     half2.append(dataplane[l])
-                    above.append(dataplane[l][1])
+                    above.append(dataplane[l][1]) # [1] means y coordinate
                 atomx.append( dataplane[l][0] )
                 atomy.append( dataplane[l][1] )
                 atomz.append( dataplane[l][2] )
@@ -245,31 +260,35 @@ for i in range(zlayers):
 #=========================================================================================
 #                              curve fitting 
 #=========================================================================================
+        
         popt, pcov = curve_fit(func, atoms_disreg, disregistry)
         mean = popt[0]
         width= popt[1]
+        #------------------------------------------------------------------------------
+        #                       plot picture or not
+        #------------------------------------------------------------------------------
+        if(flag_picture == 'y'):
+            x=[i for i in np.arange(0.,np.max(atoms_disreg),0.1)]
+            x = np.array(x)
+            yvals=func(x, mean, width)
 
-        x=[i for i in np.arange(0.,np.max(atoms_disreg),0.1)]
-        x = np.array(x)
-        yvals=func(x, mean, width)
+            fig, ax1 = plt.subplots(figsize=(18.5,10.5))
+            ax1.plot( atoms_disreg, disregistry, 'o', label='data')
+            ax1.plot(x, yvals, 'r',linewidth=5.0,label='fit')
+            ax1.set_xlabel("x"+'(' + r'$\AA$' +')')
+            # Make the y-axis label, ticks and tick labels match the line color.
+            ax1.set_ylabel(r'$\phi$'+'(' + r'$\AA$' +')', color='red')
+            ax1.tick_params('y', colors='red')
 
-        fig, ax1 = plt.subplots(figsize=(18.5,10.5))
-        ax1.plot( atoms_disreg, disregistry, 'o', label='data')
-        ax1.plot(x, yvals, 'r',linewidth=5.0,label='fit')
-        ax1.set_xlabel("x"+'(' + r'$\AA$' +')')
-        # Make the y-axis label, ticks and tick labels match the line color.
-        ax1.set_ylabel(r'$\phi$'+'(' + r'$\AA$' +')', color='red')
-        ax1.tick_params('y', colors='red')
-
-        ax2 = ax1.twinx()
-        rho2 = np.vectorize(rho)
-        ax2.plot(x, rho2(x, mean, width), 'blue', linewidth=3.0, label ='density')
-        ax2.set_ylabel(r'$\rho$', color='blue')
-        ax2.tick_params('y', colors='blue')
-        fig.tight_layout()
+            ax2 = ax1.twinx()
+            rho2 = np.vectorize(rho)
+            ax2.plot(x, rho2(x, mean, width), 'blue', linewidth=3.0, label ='density')
+            ax2.set_ylabel(r'$\rho$', color='blue')
+            ax2.tick_params('y', colors='blue')
+            fig.tight_layout()
         
-        plt.savefig('disregistry.plane'+ str(PlaneNum) + 'Disloc'+str(DislocNum)+'.pdf',bbox_inches="tight")
-        # plt.show()
+            plt.savefig('disregistry.plane'+ str(PlaneNum) + 'Disloc'+str(DislocNum)+'.pdf',bbox_inches="tight")
+            # plt.show()
 #============================================================================================
         line1 = '%4i %8i' %(PlaneNum, DislocNum)
         line2 = '%14.8f %14.8f %14.8f %14.8f ' %(b_calculated, x_calculated, y_calculated, z_calculated)

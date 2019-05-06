@@ -29,18 +29,28 @@ def func(x ,mean, width):
     return b_calculated/np.pi*np.arctan((x-mean)/width)+b_calculated/2
 def rho(x , mean, width):
     return b_calculated/np.pi*width/(np.power(x-mean,2)+ np.power(width,2))
+
 #======================================================================================
 #                       specify the filename in the terminal
-linecommon = '=========================================================\n'
+#======================================================================================
+linecommon = '=========================================================================\n'
+
+if len(sys.argv) < 2:
+    exit('Please provide a dump file to exact jog.')
 
 filename = sys.argv[1]
 if not os.path.isfile(filename):
-    print("The file is not existed!")
-    exit()
+    exit("The file is not existed!")
 #=======================================================================================
 #                        material parameter under different pressures
 #=======================================================================================
-pressure = int(input("type the pressure of system: (100, 60, 30 or 0 -- units in GPa)"+"\n"))
+while True:
+    pressure = input("type the pressure of system: (100, 60, 30 or 0 -- units in GPa)"+"\n")
+    if pressure.isdecimal():
+        pressure = int(float(pressure))
+        break
+    else:
+        print("The pressure should be a number!!")
 
 if(pressure == 100):
     alat = 3.82776
@@ -52,13 +62,19 @@ elif(pressure == 0):
     alat = 4.218
 else:
     print("The pressure is not included in the code.")
-    exit()
+    while True:
+        alat = input("Type lattice parameter : \n")
+        if alat.isdecimal():
+            alat = float(alat)
+            break
+        else:
+            print("The lattice parameter should be a number!!!")
 
 print(linecommon)
-#=======================================================================================
-flag_plane = input("Do you want to dump plane: (y or n) \n")
-flag_disloc= input("Do you want to dump disloc: (y or n) \n")
 
+#=======================================================================================
+flag_plane = input("Do you want to dump plane: (y or n) \n").lower()
+flag_disloc= input("Do you want to dump disloc: (y or n) \n").lower()
 print(linecommon)
 #=======================================================================================
 #        specify the distance between atoms in different directions
@@ -72,7 +88,6 @@ NormDistance = 0.5*alat
 #                               extract disloc
 #=======================================================================================
 
-
 xlim = linecache.getline(filename, 6)
 ylim = linecache.getline(filename, 7)
 zlim = linecache.getline(filename, 8)
@@ -85,15 +100,14 @@ print("xlim ", xlim, end='')
 print("ylim ", ylim, end='')
 print("zlim ", zlim)
 
-
 print(linecommon)
 
 #============================================================================
 skipline = 9
 
 data1     = np.loadtxt(filename, skiprows=skipline, usecols=(1,3,4,5))
-atomtype = data1[:,0]
-data = data1[:,1:4]
+atomtype  = data1[:,0]
+data      = data1[:,1:4]
 
 x0 = data[:,0]; y0 = data[:,1]; z0 = data[:,2]
 
@@ -146,13 +160,15 @@ for i in range(LineLayers):
         if( y0[j]< PosiLine + ratio*LineDistance and y0[j]> PosiLine):
             planex.append( x0[j] ); planey.append( y0[j] ); planez.append( z0[j] )
             dataplane.append(data[j])
-            AtomPosiZlayer.append( j )
+            AtomPosiZlayer.append( atomtype[j] )
 
     PlaneNum = PlaneNum + 1
     print(linecommon, "PlaneNum = ", PlaneNum)
     if(flag_plane == 'y'):
         dumpfile = "dump.plane."+str(PlaneNum)
-        DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[AtomPosiZlayer], planex, planey,planez)
+        DumpOutput(dumpfile, xlim, ylim, zlim, AtomPosiZlayer, planex, planey,planez)
+    
+    # the beginning position is the higest y of current plane
     PosiLine = np.max(planey)
 
 #========================================================================
@@ -166,9 +182,8 @@ for i in range(LineLayers):
 #       below plane; above plane
 #========================================================================
         half1 = []; half2 = []
-        # x = []; y = []; z = []
+        atomx = []; atomy = []; atomz = []
         above = []
-        # AtomsDisloc = []
 
         for l in range(len(dataplane)):
             if( dataplane[l][2] < PosiNorm+ratio*NormDistance and dataplane[l][2]>= PosiNorm):
@@ -176,17 +191,15 @@ for i in range(LineLayers):
                     half1.append( dataplane[l] )
                 else:
                     half2.append(dataplane[l])
-                    above.append(dataplane[l][2])
-                # x.append( dataplane[l][0] )
-                # y.append( dataplane[l][1] )
-                # z.append( dataplane[l][2] )
-                AtomsDisloc = half1+half2
-                AtomsDisloc = np.array(AtomsDisloc)
-                position.append(l)
+                    above.append(dataplane[l][2]) # [2] means z coordinate
+                atomx.append( dataplane[l][0] )
+                atomy.append( dataplane[l][1] )
+                atomz.append( dataplane[l][2] )
+                position.append(AtomPosiZlayer[l])
 
+        PosiNorm = np.min(above)
         len_above = len(half2)
         len_below = len(half1)
-        PosiNorm = np.min(above)
         
         if( len_below == len_above ):
             continue
@@ -206,7 +219,7 @@ for i in range(LineLayers):
             #====================================================================================
             if(flag_disloc == 'y'):
                 dumpfile = 'dump.plane'+str(PlaneNum) +".Disloc"+str(DislocNum)
-                DumpOutput(dumpfile, xlim, ylim, zlim, atomtype[position], AtomsDisloc[:,0], AtomsDisloc[:,1], AtomsDisloc[:,2] )
+                DumpOutput(dumpfile, xlim, ylim, zlim, position, atomx, atomy, atomz )
 
         #====================================================================================
         #                  fitting disloc position
@@ -234,8 +247,8 @@ for i in range(LineLayers):
 
         # get index of the density_max and then get corresponded atoms_above value
         x_calculated = atoms_disreg[list(disregistry).index(density_max)]
-        y_calculated = np.mean( AtomsDisloc[:,1] )
-        z_calculated = np.mean( AtomsDisloc[:,2] )
+        y_calculated = np.mean( atomy )
+        z_calculated = np.mean( atomz )
 
         f = open('disregistry.plane' + str(PlaneNum) +'Dis' +str(DislocNum)+'.dat', 'w')
         for k in range(len(disregistry)):

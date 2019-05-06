@@ -35,14 +35,22 @@ def rho(x , mean, width):
 #======================================================================================
 linecommon = '=========================================================\n'
 
+if len(sys.argv) < 2:
+    exit('Please provide a dump file to exact jog.')
+    
 filename = sys.argv[1]
 if not os.path.isfile(filename):
-    print("The file is not existed!")
-    exit()
+    exit("The file is not existed!")
 #=======================================================================================
 #                        material parameter under different pressures
 #=======================================================================================
-pressure = int(input("type the pressure of system: (100, 60, 30 or 0 -- units in GPa)"+"\n"))
+while True:
+    pressure = input("type the pressure of system: (100, 60, 30 or 0 -- units in GPa)"+"\n")
+    if pressure.isdecimal():
+        pressure = int(float(pressure))
+        break
+    else:
+        print("The pressure should be a number!!")
 
 if(pressure == 100):
     alat = 3.82776
@@ -54,13 +62,19 @@ elif(pressure == 0):
     alat = 4.218
 else:
     print("The pressure is not included in the code.")
-    exit()
+    while True:
+        alat = input("Type lattice parameter : \n")
+        if alat.isdecimal():
+            alat = float(alat)
+            break
+        else:
+            print("The lattice parameter should be a number!!!")
 
 print(linecommon)
 
 #=======================================================================================
-flag_plane = input("Do you want to dump plane: (y or n) \n")
-flag_disloc= input("Do you want to dump disloc: (y or n) \n")
+flag_plane = input("Do you want to dump plane: (y or n) \n").lower()
+flag_disloc= input("Do you want to dump disloc: (y or n) \n").lower()
 print(linecommon)
 #=======================================================================================
 #        specify the distance between atoms in different directions
