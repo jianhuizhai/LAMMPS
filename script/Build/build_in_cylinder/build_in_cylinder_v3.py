@@ -186,8 +186,20 @@ while True:
     else:
         print("Earlier   radius   is ", radius)
         print("Earlier z_distance is ", z_distance)
-        radius     = float(input("The   radius   : "))
-        z_distance = float(input("The z_distance : "))
+        while True:
+            radius     = input("The   radius   : ")
+            if radius.isdecimal():
+                radius = float(radius)
+                break
+            else:
+                print("The radius should be a number!!")
+        while True:
+            z_distance = input("The z_distance : ")
+            if z_distance.isdecimal():
+                z_distance = float(z_distance)
+                break
+            else:
+                print("The z_distance should be a number!!")
 
 #====================================================================================================
 filename = 'build_noclimb.sh'
