@@ -61,9 +61,24 @@ def mk_build( filename, length, flag_interstitial, atom_delete, atom_id ):
 linecommon = "==============================================================================================="
 
 print(linecommon)
-print("load deleted.dat")
-x_d, y_d, z_d = np.loadtxt('deleted.dat', usecols=(1,2,3), unpack=True)
+flag_calcu = input("Unit jogged disloc or dipole disloc (1 or 2): ")
+if flag_calcu != '1':
+    # if os.path.exists('deleted.dat'):
+    print("load deleted.dat")
+    x_d, y_d, z_d = np.loadtxt('deleted.dat', usecols=(1,2,3), unpack=True)
+    xc = np.mean(x_d)
+    yc = np.mean(y_d)
+    zc = np.mean(z_d)
 
+    z_max = np.max(z_d)
+    z_min = np.min(z_d)
+else:
+    xc = 148.426
+    yc = 229.324
+    zc = 61.1389
+    z_min = 20.00
+    z_max = 62.00
+    
 '''
 #==================================================================================
 #                   cd the folder which has the lowest energy
@@ -123,14 +138,6 @@ print("load relax.lmp")
 atomid, atom_type, x, y, z  = np.loadtxt('relax.lmp', skiprows=16, usecols=(0,1,2,3,4), unpack=True)
 atomid = np.array(atomid, dtype = int)  # change to int type to create folder
 
-xc = np.mean(x_d)
-yc = np.mean(y_d)
-zc = np.mean(z_d)
-
-z_max = np.max(z_d)
-z_min = np.min(z_d)
-line = '#ovito initial.lmp \n'
-
 print(linecommon)
 print("xc = ", xc)
 print("yc = ", yc)
@@ -139,8 +146,14 @@ print("zc = ", zc)
 #==================================================================================================
 #                   open a file and write the atom id (meet the critia) to it
 #==================================================================================================
-radius     = 3.0
-z_distance = (0.5*len(x_d)-2) * 4.218
+#radius     = 3.0
+if flag_calcu =='1':
+    radius     = 2.2
+    z_distance = 0.5
+else:
+    radius     = 3.0
+    z_distance = (0.5*len(x_d)-2) * 4.218
+
 while True:
     ions=[]
     test_info = open('distribution.dat', 'w')
@@ -149,7 +162,7 @@ while True:
 
     for i in range(len(atomid)):
         if(  atom_type[i] == delete_type  ):
-            if y[i] >= yc - 0.2 and y[i]<= yc + 2.5:
+            if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:
                 r2 = (x[i] - xc)**2 + (y[i] - yc)**2
                 if(r2 <= radius**2 and z[i] <= z_max + z_distance and z[i] >= z_min - z_distance ):
                     ions.append( atomid[i] )
@@ -186,20 +199,8 @@ while True:
     else:
         print("Earlier   radius   is ", radius)
         print("Earlier z_distance is ", z_distance)
-        while True:
-            radius     = input("The   radius   : ")
-            if radius.isdecimal():
-                radius = float(radius)
-                break
-            else:
-                print("The radius should be a number!!")
-        while True:
-            z_distance = input("The z_distance : ")
-            if z_distance.isdecimal():
-                z_distance = float(z_distance)
-                break
-            else:
-                print("The z_distance should be a number!!")
+        radius     = float( input("The   radius   : ") )
+        z_distance = float( input("The z_distance : ") )
 
 #====================================================================================================
 filename = 'build_noclimb.sh'
