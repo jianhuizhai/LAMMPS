@@ -152,7 +152,7 @@ if flag_calcu =='1':
     z_distance = 0.5
 else:
     radius     = 3.0
-    z_distance = (0.5*len(x_d)-2) * 4.218
+    z_distance = (0.5*x_d.size+4-2) * 4.218
 
 while True:
     ions=[]
@@ -162,7 +162,7 @@ while True:
 
     for i in range(len(atomid)):
         if(  atom_type[i] == delete_type  ):
-            if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:
+            if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:  # you can comment this command when you just want to the ions in a cylinder
                 r2 = (x[i] - xc)**2 + (y[i] - yc)**2
                 if(r2 <= radius**2 and z[i] <= z_max + z_distance and z[i] >= z_min - z_distance ):
                     ions.append( atomid[i] )
