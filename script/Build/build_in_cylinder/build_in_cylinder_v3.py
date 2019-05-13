@@ -91,7 +91,7 @@ print(os.getcwd())
 '''
 #==================================================================================
 print(linecommon)
-atom_delete = input("The deleted ion type : " ).lower()
+atom_delete = input("The deleted ion type (o or mg): " ).lower()
 if(atom_delete == 'mg'):
     delete_type =1
 elif(atom_delete == 'o'):
@@ -138,9 +138,11 @@ print("load relax.lmp")
 
 # get zlo and zhi in relax.lmp file
 zlim = linecache.getline('relax.lmp', 8)
-zlo  = zlim.split()[1]
-zhi  = zlim.split()[0]
+zlo  = float( zlim.split()[0] )
+zhi  = float( zlim.split()[1] )
 lz   = zhi - zlo
+print( '{}{:10.6f}'.format('zlo = ', zlo))
+print( '{}{:10.6f}'.format('zhi = ', zhi))
 
 atomid, atom_type, x, y, z  = np.loadtxt('relax.lmp', skiprows=16, usecols=(0,1,2,3,4), unpack=True)
 atomid = np.array(atomid, dtype = int)  # change to int type to create folder
@@ -166,20 +168,20 @@ else:
     radius     = 3.0
     z_distance = (0.5*x_d.size+4-2) * 4.218
 
-# include the interval when z_max+z_distance > zhi or z_min - zdistance < zlo 
-flag_interval = 0
-if z_min - z_distance < zlo:
-    zLeft = z_min - z_distance + lz
-    flag_interval = 1
-else:
-    zLeft = z_min - z_distance
-if z_max + z_distance > zhi:
-    zRight = z_max + z_distance - zhi
-    flag_interval = 1
-else:
-    zRight = z_max + z_distance
-
 while True:
+    # include the interval when z_max+z_distance > zhi or z_min - zdistance < zlo 
+    flag_interval = 0
+    if z_min - z_distance < zlo:
+        zLeft = z_min - z_distance + lz
+        flag_interval = 1
+    else:
+        zLeft = z_min - z_distance
+    if z_max + z_distance > zhi:
+        zRight = z_max + z_distance - zhi
+        flag_interval = 1
+    else:
+        zRight = z_max + z_distance
+    
     ions=[]
     test_info = open('distribution.dat', 'w')
     line = '%10i %8i %20.8f %20.8f %20.8f \n' %(0, 0, xc, yc, zc )
@@ -190,14 +192,17 @@ while True:
             if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:  # you can comment this command when you just want to the ions in a cylinder
                 r2 = (x[i] - xc)**2 + (y[i] - yc)**2
                 if r2 <= radius**2 :
-                    if flag_interval ==0 and z[i] <= z_max + z_distance and z[i] >= z_min - z_distance :
-                        ions.append( atomid[i] )
-                        line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
-                        test_info.write(line)
-                    elif flag_interval == 1 and z[i] >= zLeft or z[i] <= zRight:
-                        ions.append( atomid[i] )
-                        line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
-                        test_info.write(line)
+                    if flag_interval == 0 :
+                        if z[i] <= z_max + z_distance and z[i] >= z_min - z_distance :
+                            ions.append( atomid[i] )
+                            line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
+                            test_info.write(line)
+                    elif flag_interval == 1 :
+                        if z[i] >= zLeft or z[i] <= zRight:
+                            # print('zleft = ', zLeft, 'zright = ', zRight)
+                            ions.append( atomid[i] )
+                            line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
+                            test_info.write(line)
                     else:
                         exit("Unkown flag interval.")
 
