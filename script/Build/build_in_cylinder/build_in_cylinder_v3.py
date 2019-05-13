@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import subprocess
+import linecache 
 from sys import argv
 from math import ceil
 import matplotlib.pylab as plt
@@ -135,6 +136,12 @@ os.system('bash build_relax.sh')
 print(linecommon)
 print("load relax.lmp")
 
+# get zlo and zhi in relax.lmp file
+zlim = linecache.getline('relax.lmp', 8)
+zlo  = zlim.split()[1]
+zhi  = zlim.split()[0]
+lz   = zhi - zlo
+
 atomid, atom_type, x, y, z  = np.loadtxt('relax.lmp', skiprows=16, usecols=(0,1,2,3,4), unpack=True)
 atomid = np.array(atomid, dtype = int)  # change to int type to create folder
 
@@ -142,6 +149,11 @@ print(linecommon)
 print("xc = ", xc)
 print("yc = ", yc)
 print("zc = ", zc)
+'''
+xc = 149.892
+yc = 227.164
+'''
+
 
 #==================================================================================================
 #                   open a file and write the atom id (meet the critia) to it
@@ -154,6 +166,19 @@ else:
     radius     = 3.0
     z_distance = (0.5*x_d.size+4-2) * 4.218
 
+# include the interval when z_max+z_distance > zhi or z_min - zdistance < zlo 
+flag_interval = 0
+if z_min - z_distance < zlo:
+    zLeft = z_min - z_distance + lz
+    flag_interval = 1
+else:
+    zLeft = z_min - z_distance
+if z_max + z_distance > zhi:
+    zRight = z_max + z_distance - zhi
+    flag_interval = 1
+else:
+    zRight = z_max + z_distance
+
 while True:
     ions=[]
     test_info = open('distribution.dat', 'w')
@@ -164,10 +189,18 @@ while True:
         if(  atom_type[i] == delete_type  ):
             if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:  # you can comment this command when you just want to the ions in a cylinder
                 r2 = (x[i] - xc)**2 + (y[i] - yc)**2
-                if(r2 <= radius**2 and z[i] <= z_max + z_distance and z[i] >= z_min - z_distance ):
-                    ions.append( atomid[i] )
-                    line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
-                    test_info.write(line)
+                if r2 <= radius**2 :
+                    if flag_interval ==0 and z[i] <= z_max + z_distance and z[i] >= z_min - z_distance :
+                        ions.append( atomid[i] )
+                        line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
+                        test_info.write(line)
+                    elif flag_interval == 1 and z[i] >= zLeft or z[i] <= zRight:
+                        ions.append( atomid[i] )
+                        line = '%10i %8i %20.8f %20.8f %20.8f\n' %(atomid[i], atom_type[i], x[i], y[i], z[i] )
+                        test_info.write(line)
+                    else:
+                        exit("Unkown flag interval.")
+
     line = '# %12i \n' %len(ions)
     test_info.write(line)
     test_info.close()
@@ -209,6 +242,9 @@ print(linecommon)
 os.system('ls')
 print(linecommon)
 
+rebuild = input("Do you want to rebuild (y or n) : ").lower()
+print( linecommon )
+
 #flag_floder     = input("Do you want to clean earlier results          (y or n) \n \
 #This will delete all the folders in current folder.   : ")
 flag_interstitial= int( input("How many interstitial do you want to add (0--1--2 ) : ") )
@@ -220,29 +256,35 @@ for folder in os.listdir():
             #os.system('rm -r '+folder)
             if( all( [folder != str(k) for k in ions ] ) ):
                 os.system('rm -r '+folder)
-            else:
-                os.chdir( folder )
-                print(os.getcwd())
-                os.system('bash ~/bin/clean.sh')
-                os.chdir("../")
-                print(os.getcwd())
 
 for atom in ions:
-    print(linecommon)
-    print('atom id is : ', atom)
     folder = str(atom)
-    if(not os.path.exists( folder )):
-        os.mkdir( folder )
-    os.chdir( folder )
-    print(os.getcwd())
+    if  rebuild == 'n' and all( [folder != k for k in os.listdir() ] ) :
+        print(linecommon)
+        print('atom id is : ', atom)
+        if(not os.path.exists( folder )):
+            os.mkdir( folder )
+        os.chdir( folder )
+        print(os.getcwd())
 
-    # generate build_noclimb.sh file to generate initial.lmp
-    mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
+        # generate build_noclimb.sh file to generate initial.lmp
+        mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
 
-    os.system('bash '+filename)
-    '''
-    os.system('cp ~/bin/in.relax_atom .')
-    os.system('cp ~/bin/job_relax.slurm .')
-    '''
-    os.chdir("../")
+        os.system('bash '+filename)
+        os.chdir("../")
+    elif rebuild == 'y':
+        print(linecommon)
+        print('atom id is : ', atom)
+        if(not os.path.exists( folder )):
+            os.mkdir( folder )
+        os.chdir( folder )
+        print(os.getcwd())
+
+        # generate build_noclimb.sh file to generate initial.lmp
+        mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
+        os.system('rm -f *.out dump.relax*')
+        os.system('bash '+filename)
+        os.chdir("../")
+    else:
+        exit("Unkown build.")
 print(os.getcwd())
