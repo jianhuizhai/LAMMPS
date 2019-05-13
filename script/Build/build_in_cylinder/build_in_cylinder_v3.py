@@ -2,8 +2,6 @@ import numpy as np
 import os
 import subprocess
 import linecache 
-from sys import argv
-from math import ceil
 import matplotlib.pylab as plt
 from mpl_toolkits import mplot3d
 
@@ -18,15 +16,6 @@ def mk_build( filename, length, flag_interstitial, atom_delete, atom_id ):
     f.write(line)
     line = 'rm -f noclimb.lmp initial.lmp dump.relax* \n'
     f.write(line)
-    
-    '''
-    line = 'n=5 \n'
-    f.write(line)
-    line = 'n4=$(echo "4*$n" | bc -l) \n'
-    f.write(line)
-    line = 'atomsk /home/jianhui/LASCO/MgO/edge_110/calculations/jog/0GPa/unit_collection/climb0.lmp -duplicate 1 1 $n4 noclimb.lmp \n'
-    f.write(line)
-    '''
 
     str_line = 'atomsk ../relax.lmp '
     if( length%2 == 0):
@@ -63,32 +52,27 @@ linecommon = "==================================================================
 
 print(linecommon)
 flag_calcu = input("Unit jogged disloc or dipole disloc (1 or 2): ")
-if flag_calcu != '1':
-    # if os.path.exists('deleted.dat'):
-    print("load deleted.dat")
-    x_d, y_d, z_d = np.loadtxt('deleted.dat', usecols=(1,2,3), unpack=True)
-    xc = np.mean(x_d)
-    yc = np.mean(y_d)
-    zc = np.mean(z_d)
+if flag_calcu == '2':
+    if os.path.exists('deleted.dat'):
+        print("load deleted.dat")
+        x_d, y_d, z_d = np.loadtxt('deleted.dat', usecols=(1,2,3), unpack=True)
+        xc = np.mean(x_d)
+        yc = np.mean(y_d)
+        zc = np.mean(z_d)
 
-    z_max = np.max(z_d)
-    z_min = np.min(z_d)
-else:
+        z_max = np.max(z_d)
+        z_min = np.min(z_d)
+    else:
+        exit("The deleted.dat file doesn't exist.")
+elif flag_calcu == '1':
     xc = 148.426
     yc = 229.324
     zc = 61.1389
     z_min = 20.00
     z_max = 62.00
+else:
+    exit("Unknown disloc dipole type (unit jogged or dipole).")
     
-'''
-#==================================================================================
-#                   cd the folder which has the lowest energy
-#==================================================================================
-parent_folder = np.loadtxt('energy_info.dat',dtype=int, usecols=(0))[0]
-#print(str(parent_folder))
-os.chdir( str(parent_folder) )
-print(os.getcwd())
-'''
 #==================================================================================
 print(linecommon)
 atom_delete = input("The deleted ion type (o or mg): " ).lower()
@@ -250,11 +234,8 @@ print(linecommon)
 rebuild = input("Do you want to rebuild (y or n) : ").lower()
 print( linecommon )
 
-#flag_floder     = input("Do you want to clean earlier results          (y or n) \n \
-#This will delete all the folders in current folder.   : ")
 flag_interstitial= int( input("How many interstitial do you want to add (0--1--2 ) : ") )
 
-#if(flag_floder == 'y'):
 for folder in os.listdir():
     if(os.path.isdir(folder)):
         if(folder != 'reference' and folder != '__pycache__' and folder != 'v_mg' and folder != 'v_o'):
