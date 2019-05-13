@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import numpy as np
 import os
 import subprocess
@@ -144,7 +146,6 @@ yc = 227.164
 #==================================================================================================
 #                   open a file and write the atom id (meet the critia) to it
 #==================================================================================================
-#radius     = 3.0
 if flag_calcu =='1':
     radius     = 2.2
     z_distance = 0.5
@@ -239,7 +240,6 @@ flag_interstitial= int( input("How many interstitial do you want to add (0--1--2
 for folder in os.listdir():
     if(os.path.isdir(folder)):
         if(folder != 'reference' and folder != '__pycache__' and folder != 'v_mg' and folder != 'v_o'):
-            #os.system('rm -r '+folder)
             if( all( [folder != str(k) for k in ions ] ) ):
                 os.system('rm -r '+folder)
 
