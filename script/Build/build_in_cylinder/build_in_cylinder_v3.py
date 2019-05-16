@@ -18,19 +18,28 @@ def mk_build( filename, length, flag_interstitial, atom_delete, atom_id ):
     f.write(line)
     line = 'rm -f noclimb.lmp initial.lmp dump.relax* \n'
     f.write(line)
+    # create charge.txt in order to check the total charge of system is neutral
+    line = 'echo "charge" > charge.txt \n'
+    f.write(line)
+    line = 'echo "Mg  1.7" >> charge.txt \n'
+    f.write(line)
+    line = 'echo "O  -1.7" >> charge.txt \n'
+    f.write(line)
 
     str_line = 'atomsk ../relax.lmp '
     if( length%2 == 0):
         if flag_interstitial != 2:
-            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 initial.lmp \n' %( int(atom_id), atom_delete )
+            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -prop charge.txt initial.lmp \n' %( int(atom_id), atom_delete )
         elif flag_interstitial ==2:
-            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 initial.lmp \n' %( int(atom_id), atom_delete, atom_delete )
+            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 -prop charge.txt initial.lmp \n' \
+                %( int(atom_id), atom_delete, atom_delete )
         print(line)
     elif( length%2 == 1 ):
         if flag_interstitial != 2:
-            line = str_line+'-select %i -rmatom select initial.lmp \n' %( int(atom_id) )
+            line = str_line+'-select %i -rmatom select -prop charge.txt initial.lmp \n' %( int(atom_id) )
         elif flag_interstitial ==2:
-            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 initial.lmp \n' %( int(atom_id), atom_delete, atom_delete )
+            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 -prop charge.txt initial.lmp \n' \
+                %( int(atom_id), atom_delete, atom_delete )
         print(line)
     else:
         exit("Unkown flag interstitial.")
@@ -174,7 +183,7 @@ while True:
 
     for i in range(len(atomid)):
         if(  atom_type[i] == delete_type  ):
-            if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:  # you can comment this command when you just want to the ions in a cylinder
+            #if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:  # you can comment this command when you just want to the ions in a cylinder
                 r2 = (x[i] - xc)**2 + (y[i] - yc)**2
                 if r2 <= radius**2 :
                     if flag_interval == 0 :
@@ -272,5 +281,5 @@ for atom in ions:
         os.system('bash '+filename)
         os.chdir("../")
     else:
-        exit("Unkown build.")
+        exit("There is nothing to build or change.")
 print(os.getcwd())
