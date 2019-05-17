@@ -183,7 +183,7 @@ while True:
 
     for i in range(len(atomid)):
         if(  atom_type[i] == delete_type  ):
-            #if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:  # you can comment this command when you just want to the ions in a cylinder
+            #if  yc + 2.5 => y[i] >= yc - 1.4 :  # you can comment this command when you just want to the ions in a cylinder
                 r2 = (x[i] - xc)**2 + (y[i] - yc)**2
                 if r2 <= radius**2 :
                     if flag_interval == 0 :
