@@ -1,7 +1,8 @@
 import numpy as np
 import os
 import linecache
-import subprocess
+import subprocess  # for python3
+# import commands   ## for python2
 
 #=============================================================================================================
 linecommon = "==============================================================================================="
@@ -44,7 +45,8 @@ for folder in os.listdir():
                 print(folder)
 
                 os.chdir(folder)
-                bash_return, dumpfile = subprocess.getstatusoutput('grep -B1 "Loop time" log.lammps')
+                bash_return, dumpfile = subprocess.getstatusoutput('grep -B1 "Loop time" log.lammps') ## for python3
+                # bash_return, dumpfile = commands.getstatusoutput('grep -B1 "Loop time" log.lammps') ## for python2
                 #print(dumpfile)
                 energy = dumpfile.split()[1]
 
