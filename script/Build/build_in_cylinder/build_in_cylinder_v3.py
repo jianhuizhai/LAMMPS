@@ -183,7 +183,8 @@ while True:
 
     for i in range(len(atomid)):
         if(  atom_type[i] == delete_type  ):
-            #if  yc + 2.5 => y[i] >= yc - 1.4 :  # you can comment this command when you just want to the ions in a cylinder
+            if y[i] <= yc + 2.5:
+            #if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:  # you can comment this command when you just want to the ions in a cylinder
                 r2 = (x[i] - xc)**2 + (y[i] - yc)**2
                 if r2 <= radius**2 :
                     if flag_interval == 0 :
@@ -252,11 +253,14 @@ for folder in os.listdir():
             if( all( [folder != str(k) for k in ions ] ) ):
                 os.system('rm -r '+folder)
 
+count = 0
+
 for atom in ions:
     folder = str(atom)
+    count += 1
     if  rebuild == 'n' and all( [folder != k for k in os.listdir() ] ) :
         print(linecommon)
-        print('atom id is : ', atom)
+        print('atom id is : {}--({}/{})'.format(atom, count, len(ions)) )
         if(not os.path.exists( folder )):
             os.mkdir( folder )
         os.chdir( folder )
@@ -269,7 +273,7 @@ for atom in ions:
         os.chdir("../")
     elif rebuild == 'y':
         print(linecommon)
-        print('atom id is : ', atom)
+        print('atom id is : {}--({}/{})'.format(atom, count, len(ions)) )
         if(not os.path.exists( folder )):
             os.mkdir( folder )
         os.chdir( folder )
