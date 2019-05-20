@@ -167,12 +167,12 @@ while True:
     flag_interval = 0
 
     if z_min - z_distance < zlo:
-        zLeft = z_min - z_distance + lz
+        zLeft = z_min - z_distance - np.floor( (z_min - z_distance) / lz )*lz
         flag_interval = 1
     else:
         zLeft = z_min - z_distance
     if z_max + z_distance > zhi:
-        zRight = z_max + z_distance - zhi
+        zRight = z_max + z_distance - np.floor( (z_max+z_distance)/lz )*lz
         flag_interval = 1
     else:
         zRight = z_max + z_distance
