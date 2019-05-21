@@ -29,17 +29,17 @@ def mk_build( filename, length, flag_interstitial, atom_delete, atom_id ):
     str_line = 'atomsk ../relax.lmp '
     if( length%2 == 0):
         if flag_interstitial != 2:
-            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -prop charge.txt initial.lmp \n' %( int(atom_id), atom_delete )
+            line = str_line + '-select %s -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -prop charge.txt initial.lmp \n' %( atom_id, atom_delete )
         elif flag_interstitial ==2:
-            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 -prop charge.txt initial.lmp \n' \
-                %( int(atom_id), atom_delete, atom_delete )
+            line = str_line + '-select %s -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 -prop charge.txt initial.lmp \n' \
+                %( atom_id, atom_delete, atom_delete )
         print(line)
     elif( length%2 == 1 ):
         if flag_interstitial != 2:
-            line = str_line+'-select %i -rmatom select -prop charge.txt initial.lmp \n' %( int(atom_id) )
+            line = str_line+'-select %s -rmatom select -prop charge.txt initial.lmp \n' %( atom_id )
         elif flag_interstitial ==2:
-            line = str_line + '-select %i -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 -prop charge.txt initial.lmp \n' \
-                %( int(atom_id), atom_delete, atom_delete )
+            line = str_line + '-select %s -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 -prop charge.txt initial.lmp \n' \
+                %( atom_id, atom_delete, atom_delete )
         print(line)
     else:
         exit("Unkown flag interstitial.")
@@ -260,19 +260,20 @@ count = 0
 for atom in ions_id:
     folder = str( atom )
     count += 1
-    if  rebuild == 'n' and all( [folder != k for k in os.listdir('.') ] ) :
-        print(linecommon)
-        print('atom id is : {}--({}/{})'.format(atom, count, len(ions_id)) )
-        if(not os.path.exists( folder )):
-            os.mkdir( folder )
-        os.chdir( folder )
-        print(os.getcwd())
+    if  rebuild == 'n' :
+        if not any( [folder == k for k in os.listdir() ] ) :
+            print(linecommon)
+            print('atom id is : {}--({}/{})'.format(atom, count, len(ions_id)) )
+            if(not os.path.exists( folder )):
+                os.mkdir( folder )
+            os.chdir( folder )
+            print(os.getcwd())
 
-        # generate build_noclimb.sh file to generate initial.lmp
-        mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
+            # generate build_noclimb.sh file to generate initial.lmp
+            mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
 
-        os.system('bash '+filename)
-        os.chdir("../")
+            os.system('bash '+filename)
+            os.chdir("../")
     elif rebuild == 'y':
         print(linecommon)
         print('atom id is : {}--({}/{})'.format(atom, count, len(ions_id)) )
@@ -287,5 +288,5 @@ for atom in ions_id:
         os.system('bash '+filename)
         os.chdir("../")
     else:
-        exit("There is nothing to build or change.")
+        exit("Unknown rebuild command.")
 print(os.getcwd())
