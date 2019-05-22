@@ -160,7 +160,7 @@ if flag_calcu =='1':
     z_distance = 0.5
 else:
     radius     = 3.0
-    z_distance = (0.5*x_d.size+4-2) * 4.218
+    z_distance = 10.0
 
 while True:
     # include the interval when z_max+z_distance > zhi or z_min - zdistance < zlo 
@@ -248,13 +248,18 @@ rebuild = input("Do you want to rebuild (y or n) : ").lower()
 print( linecommon )
 
 flag_interstitial= int( input("How many interstitial do you want to add (0--1--2 ) : ") )
-
+#====================================================================================================
+#                   delete folders those are not selected in distribution
+#====================================================================================================
 for folder in os.listdir():
     if(os.path.isdir(folder)):
         if(folder != 'reference' and folder != '__pycache__' and folder != 'v_mg' and folder != 'v_o'):
             if( all( [folder != str(k) for k in ions_id ] ) ):
                 os.system('rm -r '+folder)
 
+#====================================================================================================
+#                   create folders and generate initial.lmp
+#====================================================================================================
 count = 0
 
 for atom in ions_id:
