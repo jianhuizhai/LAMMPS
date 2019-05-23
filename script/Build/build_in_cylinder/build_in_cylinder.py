@@ -112,8 +112,16 @@ os.chdir( v_folder )
 
 print(linecommon)
 print( os.getcwd() )
-
 #=================================================================================
+#                           check runned.dat exists or not
+#=================================================================================
+if not os.path.exists('runned.dat'):
+    print(linecommon)
+    runned_flag = input("runned.dat files does not exist. Do you want to generate it ? ").lower()
+    if runned_flag == 'y':
+        os.system('cp distribution.dat runned.dat')
+#==================================================================================
+
 print(linecommon)
 
 os.system('touch build_relax.sh')
@@ -181,7 +189,7 @@ while True:
 
     for i in range(len(atomid)):
         if(  atom_type[i] == delete_type  ):
-            if y[i] <= yc + 2.5:
+            #if y[i] <= yc + 2.5:
             #if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:  # you can comment this command when you just want to the ions in a cylinder
                 r2 = (x[i] - xc)**2 + (y[i] - yc)**2
                 if r2 <= radius**2 :
@@ -211,13 +219,16 @@ while True:
     print("Write distribution.dat")
     print("The selected number of ions are : ", len(ions_id))
 
-#====================================================================================================
-#               plot the chosen ions type
-#====================================================================================================
+    #====================================================================================================
+    #               plot the chosen ions type
+    #====================================================================================================
     print(linecommon)
     print("Plot point distribution")
 
     data = np.loadtxt('distribution.dat')
+    print(linecommon)
+    print('The selected length is {:4.0f}% of lz.'.format( 100*(np.max(data[:,4]) - np.min(data[:,4]) )/(zhi-zlo)) )
+    
     ax = plt.axes(projection='3d')
     #ax.scatter(x, y, z, c='r')  # 绘制数据点,颜色是红色
     #plt.scatter(data[:,2],data[:,3], data[:,4], cmap='coolwarm')
@@ -228,6 +239,8 @@ while True:
 
     plt.savefig('point_distribution.pdf')
     plt.show()
+    
+    print(linecommon)
     flag = input("Do you satisfy the point distribution (y or n) : ")
     if(flag == 'y'):
         break
