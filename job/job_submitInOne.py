@@ -2,7 +2,9 @@ import os
 import numpy as np
 #import commands  # commands for python2.x
 import subprocess # subprocess is same as commands, but it for python3.x
+import time
 
+start = time.time()
 count = 0
 if not os.path.exists('runned.dat') :
     exit("runned.dat does not exixt.")
@@ -35,3 +37,5 @@ for folder in os.listdir('.'):
 with open('runned.dat', 'a') as f:
     f.write('# 　'+str(count+len(runned)-1)+'\n')
 #print( 'count = ', count)
+end= time.time()
+print('The running time : {:10.6f}'.format(end-start) )
