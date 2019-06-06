@@ -94,6 +94,10 @@ elif(atom_delete == 'o'):
 else:
     exit("Unkown deleted ion type!")
 
+print( linecommon )
+flag_region = input('Do you want to select half of length ions or not (y or n ) : ').lower()
+if flag_region != 'y' and flag_region != 'n' :
+    exit('Unknown flag region')
 #==================================================================================
 
 print(linecommon)
@@ -163,6 +167,21 @@ yc = 227.164
 #==================================================================================================
 #                   open a file and write the atom id (meet the critia) to it
 #==================================================================================================
+#    specify the date file
+print( linecommon )
+print("The dat file to store selected ions : ")
+flag_dat = input("distribution.dat (1) or distribution_inRegion.dat (2) : ")
+
+if flag_dat == '1':
+    filename = 'distribution.dat'
+elif flag_dat =='2' :
+    filename = 'distribution_inRegion.dat'
+else:
+    exit("Unkown dat file.")
+
+print('The filename is {}'.format(filename) )
+
+#  default radius and z_distance
 if flag_calcu =='1':
     radius     = 2.2
     z_distance = 0.5
@@ -172,40 +191,48 @@ else:
 
 while True:
     # include the interval when z_max+z_distance > zhi or z_min - zdistance < zlo 
-    flag_interval = 0
+    # flag_interval = 0
 
-    if z_min - z_distance < zlo:
-        zLeft = z_min - z_distance - np.floor( (z_min - z_distance) / lz )*lz
-        flag_interval = 1
-    else:
-        zLeft = z_min - z_distance
-    if z_max + z_distance > zhi:
-        zRight = z_max + z_distance - np.floor( (z_max+z_distance)/lz )*lz
-        flag_interval = 1
-    else:
-        zRight = z_max + z_distance
+    # if z_min - z_distance < zlo:
+    #     zLeft = z_min - z_distance - np.floor( (z_min - z_distance) / lz )*lz
+    #     flag_interval = 1
+    # else:
+    #     zLeft = z_min - z_distance
+    # if z_max + z_distance > zhi:
+    #     zRight = z_max + z_distance - np.floor( (z_max+z_distance)/lz )*lz
+    #     flag_interval = 1
+    # else:
+    #     zRight = z_max + z_distance
     
     ions     =[]
-
+    
     for i in range(len(atomid)):
         if(  atom_type[i] == delete_type  ):
             #if y[i] <= yc + 2.5:
             #if y[i] >= yc - 1.4 and y[i]<= yc + 2.5:  # you can comment this command when you just want to the ions in a cylinder
                 r2 = (x[i] - xc)**2 + (y[i] - yc)**2
-                if r2 <= radius**2 :
-                    if flag_interval == 0 :
+                if r2 <= radius**2:
+                    if flag_region == 'y' :
+                        if zc > 0.5*lz :
+                            if z[i] < zc + 4.28 :
+                                ions.append( [atomid[i], atom_type[i], x[i], y[i], z[i]] )
+                        else:
+                            if z[i] > zc - 4.28:
+                                ions.append( [atomid[i], atom_type[i], x[i], y[i], z[i]] )
+                    
+                    if flag_region == 'n' :
                         if z[i] <= z_max + z_distance and z[i] >= z_min - z_distance :
                             ions.append( [atomid[i], atom_type[i], x[i], y[i], z[i]] )
                             
-                    elif flag_interval == 1 :
-                        if zRight <= zLeft: 
-                            ions.append( [atomid[i], atom_type[i], x[i], y[i], z[i]] )
+                    #elif flag_interval == 1 :
+                        # if zRight <= zLeft: 
+                        #     ions.append( [atomid[i], atom_type[i], x[i], y[i], z[i]] )
                         
-                        elif z[i] >= zLeft or z[i] <= zRight:
-                            # print('zleft = ', zLeft, 'zright = ', zRight)
-                            ions.append( [atomid[i], atom_type[i], x[i], y[i], z[i]] )
-                    else:
-                        exit("Unkown flag interval.")
+                        # elif z[i] >= zLeft or z[i] <= zRight:
+                        #     # print('zleft = ', zLeft, 'zright = ', zRight)
+                        #     ions.append( [atomid[i], atom_type[i], x[i], y[i], z[i]] )
+                    #else:
+                    #    exit("Unkown flag interval.")
     ions = np.array(ions)
     ions_id = ions[:,0].astype(int)
 
@@ -213,10 +240,12 @@ while True:
     my_header = data_fmt.format(0, 0, xc, yc, zc)
     my_footer = '#     {:12d}'.format( len(ions_id) )
     #selected_info = np.concatenate((ions_id,ions_type, ions_x, ions_y, ions_z),axis=0)
-    np.savetxt('distribution.dat', ions, header=my_header, footer=my_footer, fmt='%-10i%8i%20.8f%20.8f%20.8f',comments='')
+    
+    np.savetxt(filename, ions, header=my_header, footer=my_footer, fmt='%-10i%8i%20.8f%20.8f%20.8f',comments='')
 
     print(linecommon)
-    print("Write distribution.dat")
+    print("Write {}".format(filename) )
+    
     print("The selected number of ions are : ", len(ions_id))
 
     #====================================================================================================
@@ -225,7 +254,7 @@ while True:
     print(linecommon)
     print("Plot point distribution")
 
-    data = np.loadtxt('distribution.dat')
+    data = np.loadtxt(filename)
     print(linecommon)
     print('The selected length is {:4.0f}% of lz.'.format( 100*(np.max(data[:,4]) - np.min(data[:,4]) )/(zhi-zlo)) )
     
@@ -247,8 +276,12 @@ while True:
     else:
         print("Earlier   radius   is ", radius)
         print("Earlier z_distance is ", z_distance)
+        print("Earlier     xc     is ", xc )
+
+        print( linecommon )
         radius     = float( input("The   radius   : ") )
         z_distance = float( input("The z_distance : ") )
+        xc         = float( input("The     xc     : "))
 
 #====================================================================================================
 filename = 'build_noclimb.sh'
@@ -264,12 +297,13 @@ flag_interstitial= int( input("How many interstitial do you want to add (0--1--2
 #====================================================================================================
 #                   delete folders those are not selected in distribution
 #====================================================================================================
+'''
 for folder in os.listdir():
     if(os.path.isdir(folder)):
         if(folder != 'reference' and folder != '__pycache__' and folder != 'v_mg' and folder != 'v_o'):
             if( all( [folder != str(k) for k in ions_id ] ) ):
                 os.system('rm -r '+folder)
-
+'''
 #====================================================================================================
 #                   create folders and generate initial.lmp
 #====================================================================================================
