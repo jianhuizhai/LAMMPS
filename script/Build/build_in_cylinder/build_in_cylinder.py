@@ -152,7 +152,6 @@ print( '{}{:10.6f}'.format('zlo = ', zlo))
 print( '{}{:10.6f}'.format('zhi = ', zhi))
 
 atomid, atom_type, x, y, z  = np.loadtxt('relax.lmp', skiprows=16, usecols=(0,1,2,3,4), unpack=True)
-#atomid = np.array(atomid).astype(int)  # change to int type to create folder
 
 print(linecommon)
 print("xc = ", xc)
@@ -190,19 +189,6 @@ else:
     z_distance = 10.0
 
 while True:
-    # include the interval when z_max+z_distance > zhi or z_min - zdistance < zlo 
-    # flag_interval = 0
-
-    # if z_min - z_distance < zlo:
-    #     zLeft = z_min - z_distance - np.floor( (z_min - z_distance) / lz )*lz
-    #     flag_interval = 1
-    # else:
-    #     zLeft = z_min - z_distance
-    # if z_max + z_distance > zhi:
-    #     zRight = z_max + z_distance - np.floor( (z_max+z_distance)/lz )*lz
-    #     flag_interval = 1
-    # else:
-    #     zRight = z_max + z_distance
     
     ions     =[]
     
@@ -223,16 +209,7 @@ while True:
                     if flag_region == 'n' :
                         if z[i] <= z_max + z_distance and z[i] >= z_min - z_distance :
                             ions.append( [atomid[i], atom_type[i], x[i], y[i], z[i]] )
-                            
-                    #elif flag_interval == 1 :
-                        # if zRight <= zLeft: 
-                        #     ions.append( [atomid[i], atom_type[i], x[i], y[i], z[i]] )
-                        
-                        # elif z[i] >= zLeft or z[i] <= zRight:
-                        #     # print('zleft = ', zLeft, 'zright = ', zRight)
-                        #     ions.append( [atomid[i], atom_type[i], x[i], y[i], z[i]] )
-                    #else:
-                    #    exit("Unkown flag interval.")
+    
     ions = np.array(ions)
     ions_id = ions[:,0].astype(int)
 
@@ -293,7 +270,8 @@ print(linecommon)
 rebuild = input("Do you want to rebuild (y or n) : ").lower()
 print( linecommon )
 
-flag_interstitial= int( input("How many interstitial do you want to add (0--1--2 ) : ") )
+print("How many interstitial do you want to add (0--1--2 ) : ")
+flag_interstitial= int( input("0--1 is automatically determined by program : (0--1--2) : ") )
 #====================================================================================================
 #                   delete folders those are not selected in distribution
 #====================================================================================================
