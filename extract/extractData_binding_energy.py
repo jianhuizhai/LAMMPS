@@ -69,8 +69,8 @@ for folder in os.listdir():
             except:
                 bash_return, dumpfile = subprocess.getstatusoutput('grep -B1 "Loop time" lammps.out')
                 energy = dumpfile.split()[1]
-            finally:
-                exit("There is no avaliable data in lammps.out or log.lammps.")
+            #finally:
+            #    exit("There is no avaliable data in lammps.out or log.lammps.")
             print(energy)
                 
             for j in range(len(atomid)):
