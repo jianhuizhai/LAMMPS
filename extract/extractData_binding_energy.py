@@ -6,6 +6,8 @@ import subprocess
 #=============================================================================================================
 linecommon = "==============================================================================================="
 
+# copy earlier energy_info.dat to energy_info_earlier.dat
+os.system('cp energy_info.dat energy_info_earlier.dat')
 #=============================================================================================================
 print(linecommon)
 print("    1 --------- noclimb.lmp")
@@ -13,6 +15,7 @@ print("    2 --------- climb.lmp")
 print("    3 --------- distribution.dat")
 print("    4 --------- distribution_halfLength.dat")
 print("    5 --------- distribution_inRegion.dat")
+print("    6 --------- all folders ")
 
 flag = input("The reference system : ")
 
@@ -30,6 +33,10 @@ elif( flag == '4' ):
 elif flag == '5' :
         filename  = 'distribution_inRegion.dat'
         skiplines = 0
+elif flag == '6' :
+        filename = 'relax.lmp'
+        print( linecommon )
+        print( 'The ref sys : relax.lmp.' )
 else:
         exit("Unkown reference system!!!")
 
@@ -72,12 +79,16 @@ for folder in os.listdir():
             #finally:
             #    exit("There is no avaliable data in lammps.out or log.lammps.")
             print(energy)
-                
+            '''    
             for j in range(len(atomid)):
                 #  if( int(atomid[j]) == int(folder)):
                 if( int(folder) == int(atomid[j])):
                     line = '%-8i %8i %20.8f %20.8f %20.8f %20.8f\n' %(atomid[j], atom_type[j], x[j], y[j], z[j], float(energy))
                     energy_info.write(line)
+            '''
+            index = int(folder) - 1
+            line = '%-8i %8i %20.8f %20.8f %20.8f %20.8f\n' %(atomid[index], atom_type[index], x[index], y[index], z[index], float(energy))
+            energy_info.write(line)
             os.chdir("../")
             
 energy_info.close()
