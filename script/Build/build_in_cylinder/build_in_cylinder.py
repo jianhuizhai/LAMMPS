@@ -270,8 +270,8 @@ print(linecommon)
 rebuild = input("Do you want to rebuild (y or n) : ").lower()
 print( linecommon )
 
-print("How many interstitial do you want to add (0--1--2 ) : ")
-flag_interstitial= int( input("0--1 is automatically determined by program : (0--1--2) : ") )
+flag_interstitial= int( input("How many interstitial do you want to add (0--1--2 ) : \
+  \n  0--1 is automatically determined by program : \n (0--1--2) : ") )
 #====================================================================================================
 #                   delete folders those are not selected in distribution
 #====================================================================================================
@@ -303,6 +303,8 @@ for atom in ions_id:
             mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
 
             os.system('bash '+filename)
+            if not os.path.exists('initial.lmp'):
+                exit('initial.lmp does not exist.')
             os.chdir("../")
     elif rebuild == 'y':
         print(linecommon)
@@ -316,6 +318,8 @@ for atom in ions_id:
         mk_build( filename, len(atomid), flag_interstitial, atom_delete, folder )
         os.system('rm -f *.out dump.relax*')
         os.system('bash '+filename)
+        if not os.path.exists('initial.lmp'):
+            exit('initial.lmp does not exist.')
         os.chdir("../")
     else:
         exit("Unknown rebuild command.")
