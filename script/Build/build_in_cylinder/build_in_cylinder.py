@@ -16,7 +16,7 @@ def mk_build( filename, length, flag_interstitial, atom_delete, atom_id ):
     f = open(filename,'w')
     line = '#! /bin/bash \n'
     f.write(line)
-    line = 'rm -f noclimb.lmp initial.lmp dump.relax* \n'
+    line = 'rm -f noclimb.lmp initial.lmp \n'
     f.write(line)
     # create charge.txt in order to check the total charge of system is neutral
     line = 'echo "charge" > charge.txt \n'
@@ -233,6 +233,8 @@ while True:
 
     data = np.loadtxt(filename)
     print(linecommon)
+    print('The max z coord : {:.2f}'.format(np.max(data[:,4])) )
+    print('The min z coord : {:.2f}'.format(np.min( data[:,4] ) ) )
     print('The selected length is {:4.0f}% of lz.'.format( 100*(np.max(data[:,4]) - np.min(data[:,4]) )/(zhi-zlo)) )
     
     ax = plt.axes(projection='3d')
