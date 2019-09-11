@@ -51,8 +51,8 @@ atomid, atom_type, x, y, z = np.loadtxt(filename, skiprows=skiplines, usecols=(0
 energy_info = open('energy_info.dat', 'w')
 
 for folder in os.listdir():
-    
-    if(os.path.isdir(folder)):
+    cwd = os.getcwd()
+    if(os.path.isdir( os.path.join(cwd, folder) )):
         if not os.path.exists('reference') :
             exit('reference folder do not exist.')
         if folder == 'reference':
@@ -102,6 +102,6 @@ data = np.loadtxt('energy_info.dat')
 energy_info = open('energy_info.dat', 'w')
 a = np.array( sorted(data,key=lambda x:x[-1]) )
 for i in range(len(data)):
-    line = '%-8i %4i %16.8f %16.8f %16.8f %22.8f %12.6f\n' %(a[i][0], a[i][1], a[i][2], a[i][3], a[i][4], a[i][5], a[i][5]-float(reference_eng) )
+    line = '%-8i %4i %16.8f %16.8f %16.8f %22.8f %12.6f\n' %(a[i][0], a[i][1], a[i][2], a[i][3], a[i][4], a[i][5], float(reference_eng)-a[i][5] )
     energy_info.write(line)
 energy_info.close()
