@@ -40,6 +40,7 @@ elif flag == '6' :
 else:
         exit("Unkown reference system!!!")
 
+flag_eng = input("The reference energy : relaxed (1) or unrelaxed (2)    ")
 #=============================================================================================================
 #                               load data file
 #=============================================================================================================
@@ -57,9 +58,12 @@ for folder in os.listdir():
             exit('reference folder do not exist.')
         if folder == 'reference':
             os.chdir( folder )
-            bash_return, loglammpsfile = subprocess.getstatusoutput('grep -B1 "Loop time" log.lammps')
-            reference_eng         = loglammpsfile.split()[1]
-
+            if flag_eng == 1:
+                bash_return, loglammpsfile = subprocess.getstatusoutput('grep -B1 "Loop time" log.lammps')
+                reference_eng         = loglammpsfile.split()[1]
+            else:
+                bash_return, loglammpsfile = subprocess.getstatusoutput('grep -A1 "Step PotEng Lx" log.lammps')            
+                reference_eng         = loglammpsfile.split()[14]
             print( 'The reference energy is {}'.format(reference_eng) )
 
             os.chdir('../')
@@ -70,14 +74,15 @@ for folder in os.listdir():
             print(folder)
 
             os.chdir(folder)
-            try:
-                bash_return, dumpfile = subprocess.getstatusoutput('grep -B1 "Loop time" log.lammps')
-                energy = dumpfile.split()[1]
-            except:
-                bash_return, dumpfile = subprocess.getstatusoutput('grep -B1 "Loop time" lammps.out')
-                energy = dumpfile.split()[1]
+            if flag_eng == 1:
+                bash_return, loglammpsfile = subprocess.getstatusoutput('grep -B1 "Loop time" log.lammps')
+                energy = loglammpsfile.split()[1]
+            else:
+                bash_return, loglammpsfile = subprocess.getstatusoutput('grep -A1 "Step PotEng Lx" log.lammps')
+                energy = loglammpsfile.split()[14]
             #finally:
             #    exit("There is no avaliable data in lammps.out or log.lammps.")
+            #print( loglammpsfile)
             print(energy)
             '''    
             for j in range(len(atomid)):
@@ -102,6 +107,6 @@ data = np.loadtxt('energy_info.dat')
 energy_info = open('energy_info.dat', 'w')
 a = np.array( sorted(data,key=lambda x:x[-1]) )
 for i in range(len(data)):
-    line = '%-8i %4i %16.8f %16.8f %16.8f %22.8f %12.6f\n' %(a[i][0], a[i][1], a[i][2], a[i][3], a[i][4], a[i][5], float(reference_eng)-a[i][5] )
+    line = '%-8i %4i %16.8f %16.8f %16.8f %22.8f %12.6f\n' %(a[i][0], a[i][1], a[i][2], a[i][3], a[i][4], a[i][5], a[i][5] - float(reference_eng) )
     energy_info.write(line)
 energy_info.close()
