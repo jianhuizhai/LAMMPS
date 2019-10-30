@@ -16,6 +16,7 @@ print("    3 --------- distribution.dat")
 print("    4 --------- distribution_halfLength.dat")
 print("    5 --------- distribution_inRegion.dat")
 print("    6 --------- all folders ")
+print('='*80)
 
 flag = input("The reference system : ")
 
@@ -41,6 +42,8 @@ else:
         exit("Unkown reference system!!!")
 
 flag_eng = input("The reference energy : relaxed (1) or unrelaxed (2)    ")
+print('='*80)
+flag_pot = input("Do you want to just extract potEng ( y or n) ").lower()
 #=============================================================================================================
 #                               load data file
 #=============================================================================================================
@@ -54,7 +57,7 @@ energy_info = open('energy_info.dat', 'w')
 for folder in os.listdir():
     cwd = os.getcwd()
     if(os.path.isdir( os.path.join(cwd, folder) )):
-        if not os.path.exists('reference') :
+        if not os.path.exists('reference') and flag_pot == 'n' :
             exit('reference folder do not exist.')
         if folder == 'reference':
             os.chdir( folder )
@@ -74,12 +77,15 @@ for folder in os.listdir():
             print(folder)
 
             os.chdir(folder)
-            if flag_eng == 1:
+            if flag_eng == '1':
                 bash_return, loglammpsfile = subprocess.getstatusoutput('grep -B1 "Loop time" log.lammps')
+                print(loglammpsfile)
                 energy = loglammpsfile.split()[1]
-            else:
+            elif flag_eng == '2':
                 bash_return, loglammpsfile = subprocess.getstatusoutput('grep -A1 "Step PotEng Lx" log.lammps')
                 energy = loglammpsfile.split()[14]
+            else:
+                exit('unknown flag_eng')
             #finally:
             #    exit("There is no avaliable data in lammps.out or log.lammps.")
             #print( loglammpsfile)
@@ -107,6 +113,9 @@ data = np.loadtxt('energy_info.dat')
 energy_info = open('energy_info.dat', 'w')
 a = np.array( sorted(data,key=lambda x:x[-1]) )
 for i in range(len(data)):
-    line = '%-8i %4i %16.8f %16.8f %16.8f %22.8f %12.6f\n' %(a[i][0], a[i][1], a[i][2], a[i][3], a[i][4], a[i][5], a[i][5] - float(reference_eng) )
+    if flag_pot == 'n':
+        line = '%-8i %4i %16.8f %16.8f %16.8f %22.8f %12.6f\n' %(a[i][0], a[i][1], a[i][2], a[i][3], a[i][4], a[i][5], a[i][5] - float(reference_eng) )
+    elif flag_pot == 'y':
+        line = '%-8i %4i %16.8f %16.8f %16.8f %22.8f\n' %(a[i][0], a[i][1], a[i][2], a[i][3], a[i][4], a[i][5] )
     energy_info.write(line)
 energy_info.close()
