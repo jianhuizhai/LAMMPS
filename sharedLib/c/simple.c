@@ -98,11 +98,19 @@ int main(int narg, char **arg)
   double *v = NULL;
 
   if (lammps == 1) {
-    lammps_command(lmp,"run 10");
+    //lammps_command(lmp,"run 10");
 
     int natoms = lammps_get_natoms(lmp);
     x = (double *) malloc(3*natoms*sizeof(double));
     lammps_gather_atoms(lmp,"x",1,3,x);
+    /*
+    printf("========================================================================== \n");
+    printf("%18.14e\n", x[0]);
+    printf("%18.14e\n", x[1]);
+    printf("%18.14e\n", x[2]);
+    printf("%lf\n", x[3*natoms-1]);
+    printf("========================================================================== \n");
+    */
     v = (double *) malloc(3*natoms*sizeof(double));
     lammps_gather_atoms(lmp,"v",1,3,v);
     double epsilon = 0.1;
