@@ -29,16 +29,16 @@ def mk_build( filename, length, flag_interstitial, atom_delete, atom_id ):
     str_line = 'atomsk ../relax.lmp '
     if( length%2 == 0):
         if flag_interstitial != 2:
-            line = str_line + '-select %s -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -prop charge.txt initial.lmp \n' %( atom_id, atom_delete )
+            line = str_line + '-select %s -rmatom select -add-atom %s at 225.574 151.349 83.2435 -prop charge.txt initial.lmp \n' %( atom_id, atom_delete )
         elif flag_interstitial ==2:
-            line = str_line + '-select %s -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 -prop charge.txt initial.lmp \n' \
+            line = str_line + '-select %s -rmatom select -add-atom %s at 225.574 151.349 83.2435 -add-atom %s at 72.653 151.352 83.2435 -prop charge.txt initial.lmp \n' \
                 %( atom_id, atom_delete, atom_delete )
         print(line)
     elif( length%2 == 1 ):
         if flag_interstitial != 2:
             line = str_line+'-select %s -rmatom select -prop charge.txt initial.lmp \n' %( atom_id )
         elif flag_interstitial ==2:
-            line = str_line + '-select %s -rmatom select -add-atom %s at 224.855 150.6465 82.2513 -add-atom %s at 74.9506 150.65 82.2513 -prop charge.txt initial.lmp \n' \
+            line = str_line + '-select %s -rmatom select -add-atom %s at 225.574 151.349 83.2435 -add-atom %s at 72.653 151.352 83.2435 -prop charge.txt initial.lmp \n' \
                 %( atom_id, atom_delete, atom_delete )
         print(line)
     else:
@@ -62,27 +62,35 @@ def mk_build( filename, length, flag_interstitial, atom_delete, atom_id ):
 linecommon = "="*100
 
 print(linecommon)
-flag_calcu = input("Unit jogged disloc or dipole disloc (1 or 2): ")
-if flag_calcu == '2':
-    if os.path.exists('deleted.dat'):
-        print("load deleted.dat")
-        x_d, y_d, z_d = np.loadtxt('deleted.dat', usecols=(1,2,3), unpack=True)
-        xc = np.mean(x_d)
-        yc = np.mean(y_d)
-        zc = np.mean(z_d)
+flag_coord = input("Do you want to manually give the center of cylinder (y or n) ? ")
+if flag_coord == 'n':
+    flag_calcu = input("Unit jogged disloc or dipole disloc (1 or 2): ")
+    if flag_calcu == '2':
+        if os.path.exists('deleted.dat'):
+            print("load deleted.dat")
+            x_d, y_d, z_d = np.loadtxt('deleted.dat', usecols=(1,2,3), unpack=True)
+            xc = np.mean(x_d)
+            yc = np.mean(y_d)
+            zc = np.mean(z_d)
 
-        z_max = np.max(z_d)
-        z_min = np.min(z_d)
+            z_max = np.max(z_d)
+            z_min = np.min(z_d)
+        else:
+            exit("The deleted.dat file doesn't exist.")
+    elif flag_calcu == '1':
+        xc = 148.426
+        yc = 229.324
+        zc = 61.1389
+        z_min = 20.00
+        z_max = 62.00
     else:
-        exit("The deleted.dat file doesn't exist.")
-elif flag_calcu == '1':
-    xc = 148.426
-    yc = 229.324
-    zc = 61.1389
-    z_min = 20.00
-    z_max = 62.00
-else:
-    exit("Unknown disloc dipole type (unit jogged or dipole).")
+        exit("Unknown disloc dipole type (unit jogged or dipole).")
+elif flag_coord == 'y' :
+    xc = float( input("x coordinate : ") )
+    yc = float( input("y coordinate : ") )
+    zc = float( input("z coordinate : ") )
+    z_min = zc
+    z_max = zc
     
 #==================================================================================
 print(linecommon)
@@ -134,7 +142,7 @@ line = '#! /bin/bash \n'
 f.write(line)
 line = 'rm -f relax.lmp\n'
 f.write(line)
-line = 'atomsk ../'+dumpfile+' -select in cylinder z 224.855 150.6465 1.0 -rmatom select relax.lmp \n'
+line = 'atomsk ../'+dumpfile+' -select in cylinder z 225.574 151.349 1.0 -rmatom select relax.lmp \n'
 f.write(line)
 f.close()
 os.system('bash build_relax.sh')
@@ -180,13 +188,9 @@ else:
 
 print('The filename is {}'.format(filename) )
 
-#  default radius and z_distance
-if flag_calcu =='1':
-    radius     = 2.2
-    z_distance = 0.5
-else:
-    radius     = 3.0
-    z_distance = 10.0
+
+radius     = 3.0
+z_distance = 10.0
 
 while True:
     
@@ -256,11 +260,15 @@ while True:
         print("Earlier   radius   is ", radius)
         print("Earlier z_distance is ", z_distance)
         print("Earlier     xc     is ", xc )
+        print("Earlier     yc     is ", yc )
+        print("Earlier     zc     is ", zc )
 
         print( linecommon )
         radius     = float( input("The   radius   : ") )
         z_distance = float( input("The z_distance : ") )
-        xc         = float( input("The     xc     : "))
+        xc         = float( input("The     xc     : ") )
+        yc         = float( input("The     yc     : ") )
+        zc         = float( input("The     zc     : ") )
 
 #====================================================================================================
 filename = 'build_noclimb.sh'
