@@ -14,3 +14,5 @@ This folder contains the examples of LAMMPS and some useful programming codes or
                The description file is in each folder.
 * __extract__ : files are used to extract data.
 * __python__ : using python to run LAMMPS.
+
+mpirun -np 4 lmp_mpi -partition 2x2 -in in.neb_thot
